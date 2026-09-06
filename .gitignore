@@ -1,0 +1,24 @@
+# Frontend
+brewdesk-ui/node_modules/
+brewdesk-ui/.next/
+brewdesk-ui/out/
+brewdesk-ui/.env*
+brewdesk-ui/.vercel/
+
+# Backend
+brewdesk/build/
+brewdesk/target/
+brewdesk/.gradle/
+brewdesk/.env*
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
