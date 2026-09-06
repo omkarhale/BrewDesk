@@ -9,8 +9,29 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Role hierarchy (highest → lowest privilege):
+ *
+ *   SUPER_ADMIN        — full system access
+ *   ADMIN              — HR / office admin
+ *   REPORTING_MANAGER  — team lead, own team visibility
+ *   CHEF               — pantry operator (formerly MAKER) + own attendance
+ *   EMPLOYEE           — own attendance + beverage ordering
+ *
+ * Spring Security hasAnyRole() does NOT inherit hierarchy automatically.
+ * We therefore list all permitted roles explicitly on each matcher.
+ */
 @Configuration
 public class SecurityConfig {
+
+    private static final String[] PANTRY_STAFF =
+            {"SUPER_ADMIN", "ADMIN", "CHEF"};
+
+    private static final String[] ALL_STAFF =
+            {"SUPER_ADMIN", "ADMIN", "REPORTING_MANAGER", "CHEF", "EMPLOYEE"};
+
+    private static final String[] MANAGEMENT =
+            {"SUPER_ADMIN", "ADMIN"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -20,53 +41,58 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-
                 .cors(Customizer.withDefaults())
-
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Login does not require JWT
-                        .requestMatchers("/api/auth/login")
-                        .permitAll()
+                        // ── Public ───────────────────────────────────────────
+                        .requestMatchers("/api/auth/login").permitAll()
 
-                        // Logout requires valid JWT
-                        .requestMatchers("/api/auth/logout")
-                        .authenticated()
+                        // ── Auth (any authenticated user) ────────────────────
+                        .requestMatchers(
+                                "/api/auth/logout",
+                                "/api/auth/change-password"
+                        ).authenticated()
 
-                        // Other auth APIs
-                        .requestMatchers("/api/auth/change-password")
-                        .authenticated()
+                        // ── Self-service attendance punch & own profile ───────
+                        // Available to every role that has an employee profile
+                        .requestMatchers(
+                                "/api/attendance/punch",
+                                "/api/attendance/employees/me"
+                        ).hasAnyRole(ALL_STAFF)
 
-                        // Employee APIs
+                        // ── Beverage ordering (employees + chef) ─────────────
                         .requestMatchers("/api/orders/**")
-                        .hasRole("EMPLOYEE")
+                        .hasAnyRole("EMPLOYEE", "CHEF", "REPORTING_MANAGER",
+                                    "ADMIN", "SUPER_ADMIN")
 
-                        // Maker APIs
+                        // ── Pantry management (chef prepares orders) ─────────
                         .requestMatchers("/api/maker/**")
-                        .hasRole("MAKER")
+                        .hasAnyRole(PANTRY_STAFF)
 
-                        // Admin APIs
+                        // ── Admin user management ────────────────────────────
                         .requestMatchers("/api/admin/**")
-                        .hasRole("ADMIN")
+                        .hasAnyRole(MANAGEMENT)
 
-                        // Everything else
-                        .anyRequest()
-                        .authenticated()
+                        // ── Attendance records & management ──────────────────
+                        // Admins: full access
+                        // Managers: read own team (service layer enforces scope)
+                        .requestMatchers("/api/attendance/**")
+                        .hasAnyRole(ALL_STAFF)
+
+                        // ── Dev simulator — admin only in any environment ─────
+                        .requestMatchers("/api/dev/**")
+                        .hasAnyRole(MANAGEMENT)
+
+                        // ── Everything else ──────────────────────────────────
+                        .anyRequest().authenticated()
                 )
 
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(
-                                        revokedTokenConverter
-                                )
-                        )
-                );
+                                jwt.jwtAuthenticationConverter(revokedTokenConverter)));
 
         return http.build();
     }
@@ -76,18 +102,11 @@ public class SecurityConfig {
 
         JwtGrantedAuthoritiesConverter authoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
-
         authoritiesConverter.setAuthoritiesClaimName("role");
-
         authoritiesConverter.setAuthorityPrefix("ROLE_");
 
-        JwtAuthenticationConverter converter =
-                new JwtAuthenticationConverter();
-
-        converter.setJwtGrantedAuthoritiesConverter(
-                authoritiesConverter
-        );
-
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
         return converter;
     }
 }

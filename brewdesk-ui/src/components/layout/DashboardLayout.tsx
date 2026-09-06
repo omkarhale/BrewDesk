@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { Sidebar } from './Sidebar'
-import { Header } from './Header'
+import { getUnauthorizedRedirect } from '@/lib/roles'
 import { cn } from '@/lib/utils'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Header } from './Header'
+import { Sidebar } from './Sidebar'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -14,19 +15,28 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isAuthenticated, isLoading, user } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoading) return
+
+    if (!isAuthenticated) {
       router.replace('/login')
       return
     }
 
-    // If authenticated but must change password, redirect to change-password
-    if (!isLoading && isAuthenticated && user?.mustChangePassword) {
+    if (user?.mustChangePassword) {
       router.replace('/change-password')
+      return
     }
-  }, [isAuthenticated, isLoading, router, user])
+
+    // Role-based route guard
+    const redirect = getUnauthorizedRedirect(pathname, user?.role)
+    if (redirect) {
+      router.replace(redirect)
+    }
+  }, [isAuthenticated, isLoading, pathname, router, user])
 
   if (isLoading) {
     return (
@@ -39,10 +49,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     )
   }
 
-  if (!isAuthenticated) return null
-
-  // If must change password, don't render dashboard content
-  if (user?.mustChangePassword) return null
+  if (!isAuthenticated || user?.mustChangePassword) return null
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -67,11 +74,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main
-          className={cn(
-            'flex-1 overflow-y-auto px-4 py-6 lg:px-6',
-          )}
-        >
+        <main className={cn('flex-1 overflow-y-auto px-4 py-6 lg:px-6')}>
           {children}
         </main>
       </div>

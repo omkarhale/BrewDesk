@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/attendance")
@@ -37,7 +38,7 @@ public class AttendanceCalculationController {
         );
     }
 
-    // ── List / search attendance records ─────────────────────────────────────
+    // ── Paginated filtered records list ───────────────────────────────────────
 
     @GetMapping("/records")
     public ResponseEntity<AttendanceRecordsPageResponse> getRecords(
@@ -52,13 +53,21 @@ public class AttendanceCalculationController {
     ) {
         return ResponseEntity.ok(
                 attendanceCalculationService.getRecords(
-                        employeeCode,
-                        dateFrom,
-                        dateTo,
-                        status,
-                        page,
-                        size
+                        employeeCode, dateFrom, dateTo, status, page, size
                 )
+        );
+    }
+
+    // ── Monthly calendar data (all days in a month for one employee) ──────────
+
+    @GetMapping("/records/month")
+    public ResponseEntity<List<AttendanceRecordResponse>> getMonthRecords(
+            @RequestParam String employeeCode,
+            @RequestParam int year,
+            @RequestParam int month
+    ) {
+        return ResponseEntity.ok(
+                attendanceCalculationService.getMonthRecords(employeeCode, year, month)
         );
     }
 }

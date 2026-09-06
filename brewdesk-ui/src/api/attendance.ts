@@ -1,15 +1,16 @@
 import apiClient from '@/lib/api'
 import {
-    AttendanceCalculationResponse,
-    AttendanceRecordsPage,
-    AttendanceRecordsParams,
-    CreateDepartmentRequest,
-    CreateEmployeeRequest,
-    CreateShiftRequest,
-    Department,
-    Employee,
-    Shift,
-    SimulatePunchRequest,
+  AttendanceCalculationResponse,
+  AttendanceRecordsPage,
+  AttendanceRecordsParams,
+  CreateDepartmentRequest,
+  CreateEmployeeRequest,
+  CreateShiftRequest,
+  Department,
+  Employee,
+  Shift,
+  SimulatePunchRequest,
+  WebPunchResponse,
 } from '@/types/attendance'
 
 // Attendance Calculation
@@ -85,5 +86,29 @@ export async function getAttendanceRecords(
   const response = await apiClient.get<AttendanceRecordsPage>(
     `/api/attendance/records?${query.toString()}`
   )
+  return response.data
+}
+
+// Monthly calendar records (all days for one employee in a given month)
+export async function getMonthAttendance(
+  employeeCode: string,
+  year: number,
+  month: number
+): Promise<AttendanceCalculationResponse[]> {
+  const response = await apiClient.get<AttendanceCalculationResponse[]>(
+    `/api/attendance/records/month?employeeCode=${encodeURIComponent(employeeCode)}&year=${year}&month=${month}`
+  )
+  return response.data
+}
+
+// My employee profile (from JWT)
+export async function getMyProfile(): Promise<Employee> {
+  const response = await apiClient.get<Employee>('/api/attendance/employees/me')
+  return response.data
+}
+
+// Web self-service punch
+export async function webPunch(): Promise<WebPunchResponse> {
+  const response = await apiClient.post<WebPunchResponse>('/api/attendance/punch')
   return response.data
 }

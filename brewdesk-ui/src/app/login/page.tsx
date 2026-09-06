@@ -1,19 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff, Coffee, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useAuth } from '@/hooks/useAuth'
-import { loginSchema, LoginFormValues } from '@/schemas/auth.schema'
-import { getErrorMessage } from '@/lib/utils'
-import { setTemporaryPassword } from '@/lib/tempPassword'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks/useAuth'
+import { setTemporaryPassword } from '@/lib/tempPassword'
+import { getErrorMessage } from '@/lib/utils'
+import { LoginFormValues, loginSchema } from '@/schemas/auth.schema'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Coffee, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+
+import { getDashboardPath } from '@/types/auth'
 
 export default function LoginPage() {
   const { login, isAuthenticated, isLoading: authLoading, user } = useAuth()
@@ -35,15 +37,11 @@ export default function LoginPage() {
   useEffect(() => {
     if (authLoading) return
     if (isAuthenticated && user) {
-      // If must change password, redirect to change-password
       if (user.mustChangePassword) {
         router.replace('/change-password')
         return
       }
-      // Otherwise redirect to role-based dashboard
-      if (user.role === 'ADMIN') router.replace('/dashboard/admin')
-      else if (user.role === 'MAKER') router.replace('/dashboard/maker')
-      else router.replace('/dashboard')
+      router.replace(getDashboardPath(user.role))
     }
   }, [isAuthenticated, authLoading, user, router])
 

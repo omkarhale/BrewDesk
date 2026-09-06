@@ -1,20 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Eye, EyeOff, Coffee, Loader2, Check, AlertCircle } from 'lucide-react'
-import { toast } from 'sonner'
-import { useAuth } from '@/hooks/useAuth'
 import { changePasswordApi } from '@/api/auth'
-import { ChangePasswordRequest } from '@/types/auth'
-import { setTemporaryPassword, clearTemporaryPassword, getTemporaryPassword } from '@/lib/tempPassword'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks/useAuth'
+import { clearTemporaryPassword, getTemporaryPassword } from '@/lib/tempPassword'
+import { ChangePasswordRequest } from '@/types/auth'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Check, Coffee, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
 const changePasswordSchema = z
   .object({
@@ -31,6 +31,8 @@ const changePasswordSchema = z
   })
 
 type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>
+
+import { getDashboardPath } from '@/types/auth'
 
 export default function ChangePasswordPage() {
   const { user, logout, updateMustChangePassword } = useAuth()
@@ -62,15 +64,7 @@ export default function ChangePasswordPage() {
       return
     }
     if (!user.mustChangePassword) {
-      // User already has normal password, redirect to dashboard
-      const role = user.role
-      if (role === 'ADMIN') {
-        router.replace('/dashboard/admin')
-      } else if (role === 'MAKER') {
-        router.replace('/dashboard/maker')
-      } else {
-        router.replace('/dashboard')
-      }
+      router.replace(getDashboardPath(user.role))
     }
   }, [user, router])
 
@@ -103,14 +97,7 @@ export default function ChangePasswordPage() {
       
       // Redirect to dashboard after short delay
       setTimeout(() => {
-        const role = user?.role
-        if (role === 'ADMIN') {
-          router.push('/dashboard/admin')
-        } else if (role === 'MAKER') {
-          router.push('/dashboard/maker')
-        } else {
-          router.push('/dashboard')
-        }
+        router.push(getDashboardPath(user!.role))
       }, 2000)
       
     } catch (err: any) {

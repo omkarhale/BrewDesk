@@ -1,11 +1,10 @@
 'use client'
 
-import React, { createContext, useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { loginApi, logoutApi } from '@/api/auth'
 import { clearSession, getStoredToken, getStoredUser, isTokenExpired, saveSession } from '@/lib/auth'
-import { LoginRequest } from '@/types/auth'
-import { AuthUser } from '@/types/auth'
+import { AuthUser, LoginRequest, getDashboardPath } from '@/types/auth'
+import { useRouter } from 'next/navigation'
+import React, { createContext, useCallback, useEffect, useState } from 'react'
 
 interface AuthContextValue {
   user: AuthUser | null
@@ -53,14 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (response.mustChangePassword) {
       router.push('/change-password')
     } else {
-      const role = response.role
-      if (role === 'ADMIN') {
-        router.push('/dashboard/admin')
-      } else if (role === 'MAKER') {
-        router.push('/dashboard/maker')
-      } else {
-        router.push('/dashboard')
-      }
+      router.push(getDashboardPath(response.role))
     }
   }, [router])
 

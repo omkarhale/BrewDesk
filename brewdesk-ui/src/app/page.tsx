@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { getDashboardPath } from '@/types/auth'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function Home() {
   const { isAuthenticated, isLoading, user } = useAuth()
@@ -14,9 +15,7 @@ export default function Home() {
       router.replace('/login')
       return
     }
-    if (user?.role === 'ADMIN') router.replace('/dashboard/admin')
-    else if (user?.role === 'MAKER') router.replace('/dashboard/maker')
-    else router.replace('/dashboard')
+    router.replace(getDashboardPath(user!.role))
   }, [isAuthenticated, isLoading, user, router])
 
   return (

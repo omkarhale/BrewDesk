@@ -124,3 +124,14 @@ export interface AttendanceRecordsPage {
   first: boolean
   last: boolean
 }
+
+// ── Web punch ─────────────────────────────────────────────────────────────────
+
+export interface WebPunchResponse {
+  eventId: number
+  employeeCode: string
+  eventTime: string
+  source: string
+  eventType: string
+  message: string
+}

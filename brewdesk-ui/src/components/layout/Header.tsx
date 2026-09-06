@@ -1,21 +1,29 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
-import { Bell, Menu, Moon, Sun, Monitor } from 'lucide-react'
-import { useTheme } from 'next-themes'
-import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { getInitials } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useAuth } from '@/hooks/useAuth'
+import { getInitials } from '@/lib/utils'
+import { Bell, Menu, Monitor, Moon, Sun } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
+
+const ROLE_BADGE: Record<string, 'danger' | 'upcoming' | 'success'> = {
+  SUPER_ADMIN: 'danger',
+  ADMIN:       'danger',
+  REPORTING_MANAGER: 'upcoming',
+  CHEF:        'upcoming',
+  EMPLOYEE:    'success',
+}
 
 const routeLabels: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -103,10 +111,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               <div className="hidden sm:flex flex-col items-start leading-tight">
                 <span className="text-sm font-medium">{user?.name}</span>
                 <Badge
-                  variant={
-                    user?.role === 'ADMIN' ? 'danger' :
-                    user?.role === 'MAKER' ? 'upcoming' : 'success'
-                  }
+                  variant={ROLE_BADGE[user?.role ?? 'EMPLOYEE'] ?? 'success'}
                   className="text-[9px] px-1 py-0 h-4"
                 >
                   {user?.role}

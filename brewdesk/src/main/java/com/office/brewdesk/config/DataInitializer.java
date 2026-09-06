@@ -31,10 +31,10 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.findByEmail("admin@brewdesk.com").isEmpty()) {
 
             User admin = User.builder()
-                    .name("Admin")
-                    .email("admin@brewdesk.com")
+                    .name("Super Admin")
+                    .email("superadmin@brewdesk.com")
                     .password(passwordEncoder.encode("password123"))
-                    .role(Role.ADMIN)
+                    .role(Role.SUPER_ADMIN)
                     .active(true)
                     .build();
 

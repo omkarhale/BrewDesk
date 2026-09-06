@@ -288,6 +288,28 @@ public class AttendanceCalculationService {
     // ── Records list ──────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
+    public List<AttendanceRecordResponse> getMonthRecords(
+            String employeeCode,
+            int year,
+            int month
+    ) {
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay  = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        var spec = AttendanceRecordSpecification.withFilters(
+                employeeCode, firstDay, lastDay, null
+        );
+
+        var sort = Sort.by(Sort.Direction.ASC, "attendanceDate");
+
+        return attendanceRecordRepository
+                .findAll(spec, sort)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public AttendanceRecordsPageResponse getRecords(
             String employeeCode,
             LocalDate dateFrom,

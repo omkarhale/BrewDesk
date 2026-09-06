@@ -1,15 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { User, Mail, Shield, LogOut } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogoutConfirmDialog } from '@/components/auth/LogoutConfirmDialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { LogoutConfirmDialog } from '@/components/auth/LogoutConfirmDialog'
+import { useAuth } from '@/hooks/useAuth'
 import { getInitials } from '@/lib/utils'
+import { LogOut, Mail, Shield, User } from 'lucide-react'
+import { useState } from 'react'
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
@@ -17,7 +17,9 @@ export default function ProfilePage() {
 
   if (!user) return null
 
-  const roleColor = user.role === 'ADMIN' ? 'danger' : user.role === 'MAKER' ? 'upcoming' : 'success'
+  const roleColor: 'danger' | 'upcoming' | 'success' =
+    user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' ? 'danger' :
+    user.role === 'REPORTING_MANAGER' || user.role === 'CHEF' ? 'upcoming' : 'success'
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">

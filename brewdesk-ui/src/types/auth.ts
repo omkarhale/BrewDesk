@@ -1,4 +1,58 @@
-export type Role = 'ADMIN' | 'MAKER' | 'EMPLOYEE'
+// Role hierarchy (highest → lowest privilege)
+export type Role =
+  | 'SUPER_ADMIN'
+  | 'ADMIN'
+  | 'REPORTING_MANAGER'
+  | 'CHEF'
+  | 'EMPLOYEE'
+
+// ── Role helpers ─────────────────────────────────────────────────────────────
+
+/** Roles that have full HR / system admin access */
+export const MANAGEMENT_ROLES: Role[] = ['SUPER_ADMIN', 'ADMIN']
+
+/** Roles that have an employee profile and can punch in/out */
+export const STAFF_ROLES: Role[] = [
+  'SUPER_ADMIN',
+  'ADMIN',
+  'REPORTING_MANAGER',
+  'CHEF',
+  'EMPLOYEE',
+]
+
+/** Roles that manage pantry operations */
+export const PANTRY_ADMIN_ROLES: Role[] = ['SUPER_ADMIN', 'ADMIN', 'CHEF']
+
+export function hasRole(userRole: Role | undefined, allowed: Role[]): boolean {
+  if (!userRole) return false
+  return allowed.includes(userRole)
+}
+
+export function isManagement(role: Role | undefined): boolean {
+  return hasRole(role, MANAGEMENT_ROLES)
+}
+
+export function isSuperAdmin(role: Role | undefined): boolean {
+  return role === 'SUPER_ADMIN'
+}
+
+/** Landing page per role after login */
+export function getDashboardPath(role: Role): string {
+  switch (role) {
+    case 'SUPER_ADMIN':
+    case 'ADMIN':
+      return '/dashboard/admin'
+    case 'REPORTING_MANAGER':
+      return '/dashboard/manager'
+    case 'CHEF':
+      return '/dashboard/chef'
+    case 'EMPLOYEE':
+    default:
+      return '/dashboard'
+  }
+}
+
+// ── Auth interfaces ───────────────────────────────────────────────────────────
 
 export interface LoginRequest {
   email: string
@@ -13,17 +67,11 @@ export interface LoginResponse {
   mustChangePassword: boolean
 }
 
-// The user object stored in context / localStorage
-// employeeId is decoded from the JWT payload (sub claim is email, id not present)
-// We store what we get from the login response plus a numeric id parsed from the token if available
 export interface AuthUser {
   name: string
   email: string
   role: Role
   mustChangePassword: boolean
-  // employeeId is required by POST /api/orders; backend seeds: admin=1, maker=2, employee=3
-  // We extract it by decoding the JWT — if the backend ever adds an `id` claim this will use it,
-  // otherwise the consumer must handle the case where it's undefined.
   employeeId?: number
 }
 
