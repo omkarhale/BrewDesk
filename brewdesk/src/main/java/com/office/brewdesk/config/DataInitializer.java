@@ -28,7 +28,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void createUsers() {
 
-        if (userRepository.findByEmail("admin@brewdesk.com").isEmpty()) {
+        if (userRepository.findByEmail("superadmin@brewdesk.com").isEmpty()) {
 
             User admin = User.builder()
                     .name("Super Admin")

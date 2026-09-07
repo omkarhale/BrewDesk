@@ -5,7 +5,7 @@
  * DashboardLayout checks this on every navigation.
  * More specific paths must come before generic prefixes.
  */
-import { Role, MANAGEMENT_ROLES } from '@/types/auth'
+import { MANAGEMENT_ROLES, Role } from '@/types/auth'
 
 export interface RouteGuard {
   path: string
@@ -37,7 +37,7 @@ export const ROUTE_GUARDS: RouteGuard[] = [
   { path: '/dashboard/beverages',                 allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'CHEF'] },
 
   // All staff (have employee profiles)
-  { path: '/dashboard/attendance/my',             allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'REPORTING_MANAGER', 'CHEF', 'EMPLOYEE'] },
+  { path: '/dashboard/attendance/my', allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'REPORTING_MANAGER', 'CHEF', 'EMPLOYEE'] },
 ]
 
 /**
