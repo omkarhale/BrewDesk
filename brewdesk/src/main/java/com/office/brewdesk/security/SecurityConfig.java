@@ -22,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * We therefore list all permitted roles explicitly on each matcher.
  */
 @Configuration
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
     private static final String[] PANTRY_STAFF =
@@ -110,3 +111,4 @@ public class SecurityConfig {
         return converter;
     }
 }
+

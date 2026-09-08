@@ -1,36 +1,110 @@
 'use client'
 
-import { ClipboardList } from 'lucide-react'
-import { AttendanceCalculationResponse } from '@/types/attendance'
-import {
-  formatAttendanceDate,
-  formatAttendanceTime,
-  formatWorkMinutes,
-  formatLateMinutes,
-} from '@/lib/utils'
-import { AttendanceStatusBadge } from './AttendanceStatusBadge'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { EmptyState } from '@/components/dashboard/EmptyState'
 import { ErrorState } from '@/components/dashboard/ErrorState'
+import { cn, formatAttendanceDate, formatAttendanceTime, formatLateMinutes, formatWorkMinutes } from '@/lib/utils'
+import { AttendanceCalculationResponse } from '@/types/attendance'
+import { ClipboardList } from 'lucide-react'
+import { AttendanceStatusBadge } from './AttendanceStatusBadge'
 
 interface AttendanceRecordsTableProps {
-  records: AttendanceCalculationResponse[] | undefined
-  isLoading: boolean
+  records:    AttendanceCalculationResponse[] | undefined
+  isLoading:  boolean
   isFetching: boolean
-  error: Error | null
-  onRetry: () => void
+  error:      Error | null
+  onRetry:    () => void
 }
 
 const SKELETON_ROWS = 8
+
+// ── Column definition ─────────────────────────────────────────────────────────
+
+const TH = ({
+  children,
+  className,
+}: { children: React.ReactNode; className?: string }) => (
+  <th
+    className={cn(
+      'px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap',
+      className,
+    )}
+  >
+    {children}
+  </th>
+)
+
+const TD = ({
+  children,
+  className,
+}: { children: React.ReactNode; className?: string }) => (
+  <td className={cn('px-4 py-3 text-[13px]', className)}>
+    {children}
+  </td>
+)
+
+// ── Skeleton row ──────────────────────────────────────────────────────────────
+
+function SkeletonRow() {
+  return (
+    <tr>
+      <TD><div className="h-3.5 w-20 rounded bg-muted animate-pulse" /></TD>
+      <TD><div className="h-3.5 w-24 rounded bg-muted animate-pulse" /></TD>
+      <TD className="hidden sm:table-cell"><div className="h-3.5 w-20 rounded bg-muted animate-pulse" /></TD>
+      <TD className="hidden md:table-cell"><div className="h-3.5 w-16 rounded bg-muted animate-pulse" /></TD>
+      <TD className="hidden md:table-cell"><div className="h-3.5 w-16 rounded bg-muted animate-pulse" /></TD>
+      <TD className="hidden lg:table-cell"><div className="h-3.5 w-14 rounded bg-muted animate-pulse" /></TD>
+      <TD className="hidden lg:table-cell"><div className="h-3.5 w-14 rounded bg-muted animate-pulse" /></TD>
+      <TD><div className="h-5 w-20 rounded-full bg-muted animate-pulse" /></TD>
+    </tr>
+  )
+}
+
+// ── Data row ──────────────────────────────────────────────────────────────────
+
+function DataRow({ record }: { record: AttendanceCalculationResponse }) {
+  return (
+    <tr className="border-t border-border hover:bg-[hsl(220_20%_97%)] dark:hover:bg-muted/30 transition-colors duration-75">
+      <TD>
+        <span className="font-mono text-[12px] font-semibold text-foreground">
+          {record.employeeCode}
+        </span>
+      </TD>
+      <TD>
+        <span className="text-muted-foreground">
+          {formatAttendanceDate(record.attendanceDate)}
+        </span>
+      </TD>
+      <TD className="hidden sm:table-cell">
+        <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+          {record.shiftName}
+        </span>
+      </TD>
+      <TD className="hidden md:table-cell">
+        <span className="font-mono">{formatAttendanceTime(record.firstIn)}</span>
+      </TD>
+      <TD className="hidden md:table-cell">
+        <span className="font-mono">{formatAttendanceTime(record.lastOut)}</span>
+      </TD>
+      <TD className="hidden lg:table-cell">
+        <span className="font-medium">{formatWorkMinutes(record.totalWorkMinutes)}</span>
+      </TD>
+      <TD className="hidden lg:table-cell">
+        {record.lateMinutes > 0 ? (
+          <span className="text-amber-600 dark:text-amber-400 font-medium">
+            {formatLateMinutes(record.lateMinutes)}
+          </span>
+        ) : (
+          <span className="text-muted-foreground/40">—</span>
+        )}
+      </TD>
+      <TD>
+        <AttendanceStatusBadge status={record.status} />
+      </TD>
+    </tr>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 export function AttendanceRecordsTable({
   records,
@@ -39,44 +113,10 @@ export function AttendanceRecordsTable({
   error,
   onRetry,
 }: AttendanceRecordsTableProps) {
-  if (isLoading) {
-    return (
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/30 hover:bg-muted/30">
-              <TableHead>Employee</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="hidden sm:table-cell">Shift</TableHead>
-              <TableHead className="hidden md:table-cell">First In</TableHead>
-              <TableHead className="hidden md:table-cell">Last Out</TableHead>
-              <TableHead className="hidden lg:table-cell">Work</TableHead>
-              <TableHead className="hidden lg:table-cell">Late</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
-              <TableRow key={i}>
-                <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
-                <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
-                <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
-                <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-14" /></TableCell>
-                <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-14" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    )
-  }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-border bg-card">
+      <div className="card-flat">
         <ErrorState
           message={error.message || 'Failed to load attendance records.'}
           onRetry={onRetry}
@@ -85,9 +125,9 @@ export function AttendanceRecordsTable({
     )
   }
 
-  if (!records || records.length === 0) {
+  if (!isLoading && (!records || records.length === 0)) {
     return (
-      <div className="rounded-xl border border-border bg-card">
+      <div className="card-flat">
         <EmptyState
           icon={ClipboardList}
           title="No records found"
@@ -98,67 +138,43 @@ export function AttendanceRecordsTable({
   }
 
   return (
-    <div className={`rounded-xl border border-border bg-card overflow-hidden transition-opacity ${isFetching ? 'opacity-60' : 'opacity-100'}`}>
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/30 hover:bg-muted/30">
-            <TableHead>Employee</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead className="hidden sm:table-cell">Shift</TableHead>
-            <TableHead className="hidden md:table-cell">First In</TableHead>
-            <TableHead className="hidden md:table-cell">Last Out</TableHead>
-            <TableHead className="hidden lg:table-cell">Work</TableHead>
-            <TableHead className="hidden lg:table-cell">Late</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {records.map((record) => (
-            <TableRow key={`${record.employeeCode}-${record.attendanceDate}`}>
-              <TableCell>
-                <span className="font-mono text-sm font-semibold">{record.employeeCode}</span>
-              </TableCell>
-              <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  {formatAttendanceDate(record.attendanceDate)}
-                </span>
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">
-                <Badge variant="secondary" className="font-normal text-xs">
-                  {record.shiftName}
-                </Badge>
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                <span className="text-sm font-mono">
-                  {formatAttendanceTime(record.firstIn)}
-                </span>
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                <span className="text-sm font-mono">
-                  {formatAttendanceTime(record.lastOut)}
-                </span>
-              </TableCell>
-              <TableCell className="hidden lg:table-cell">
-                <span className="text-sm font-medium">
-                  {formatWorkMinutes(record.totalWorkMinutes)}
-                </span>
-              </TableCell>
-              <TableCell className="hidden lg:table-cell">
-                {record.lateMinutes > 0 ? (
-                  <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                    {formatLateMinutes(record.lateMinutes)}
-                  </span>
-                ) : (
-                  <span className="text-sm text-muted-foreground">—</span>
-                )}
-              </TableCell>
-              <TableCell>
-                <AttendanceStatusBadge status={record.status} />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div
+      className={cn(
+        'card-flat overflow-hidden transition-opacity duration-150',
+        isFetching && !isLoading ? 'opacity-60' : 'opacity-100',
+      )}
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full">
+
+          {/* ── Header ── */}
+          <thead>
+            <tr className="table-header-rippling">
+              <TH>Employee</TH>
+              <TH>Date</TH>
+              <TH className="hidden sm:table-cell">Shift</TH>
+              <TH className="hidden md:table-cell">First In</TH>
+              <TH className="hidden md:table-cell">Last Out</TH>
+              <TH className="hidden lg:table-cell">Work</TH>
+              <TH className="hidden lg:table-cell">Late</TH>
+              <TH>Status</TH>
+            </tr>
+          </thead>
+
+          {/* ── Body ── */}
+          <tbody>
+            {isLoading
+              ? Array.from({ length: SKELETON_ROWS }).map((_, i) => <SkeletonRow key={i} />)
+              : records!.map((record) => (
+                  <DataRow
+                    key={`${record.employeeCode}-${record.attendanceDate}`}
+                    record={record}
+                  />
+                ))
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

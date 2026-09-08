@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -17,7 +17,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { useEmployeesQuery } from '@/hooks/useEmployeeManagement'
 import { getErrorMessage } from '@/lib/utils'
 import { AttendanceRecordsParams, AttendanceStatus } from '@/types/attendance'
+import { isManagement } from '@/types/auth'
+import { BulkCalculationWidget } from "@/features/attendance/components/BulkCalculationWidget";
 import {
+    Calculator,
     ChevronLeft,
     ChevronRight,
     ClipboardList,
@@ -40,17 +43,18 @@ function defaultDateTo(): string {
 }
 
 export default function AttendanceRecordsPage() {
+  const [showBulk, setShowBulk] = useState(false);
   const { user } = useAuth()
-  const isAdmin = user?.role === 'ADMIN'
+  const isAdmin = isManagement(user?.role)
 
-  // ── Filter state ────────────────────────────────────────────────────────────
+  // â”€â”€ Filter state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [employeeCode, setEmployeeCode] = useState('')
   const [dateFrom, setDateFrom] = useState(defaultDateFrom())
   const [dateTo, setDateTo] = useState(defaultDateTo())
   const [status, setStatus] = useState<AttendanceStatus | ''>('')
   const [page, setPage] = useState(0)
 
-  // Committed params — only applied when Search is clicked or filters reset
+  // Committed params â€” only applied when Search is clicked or filters reset
   const [committedParams, setCommittedParams] = useState<AttendanceRecordsParams>({
     employeeCode: undefined,
     dateFrom: defaultDateFrom(),
@@ -65,7 +69,7 @@ export default function AttendanceRecordsPage() {
   // Keep employee list for the code dropdown hint
   const { data: employees = [] } = useEmployeesQuery()
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const applyFilters = useCallback(
     (overridePage = 0) => {
       setPage(overridePage)
@@ -108,7 +112,7 @@ export default function AttendanceRecordsPage() {
     dateTo !== defaultDateTo() ||
     !!status
 
-  // ── Access guard ────────────────────────────────────────────────────────────
+  // â”€â”€ Access guard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center max-w-md mx-auto">
@@ -147,6 +151,20 @@ export default function AttendanceRecordsPage() {
           <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
+      </div>
+
+      {/* Bulk Calculation Panel */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowBulk(v => !v)}
+          className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors mb-2"
+        >
+          <Calculator className="h-3.5 w-3.5" />
+          Bulk Recalculate
+          {showBulk ? ' ▲' : ' ▼'}
+        </button>
+        {showBulk && <BulkCalculationWidget />}
       </div>
 
       {/* Filters */}
@@ -284,7 +302,7 @@ export default function AttendanceRecordsPage() {
               .map((item, idx) =>
                 item === 'ellipsis' ? (
                   <span key={`e-${idx}`} className="text-muted-foreground text-sm px-1">
-                    …
+                    â€¦
                   </span>
                 ) : (
                   <Button
@@ -315,3 +333,5 @@ export default function AttendanceRecordsPage() {
     </div>
   )
 }
+
+

@@ -1,13 +1,14 @@
 package com.office.brewdesk.attendance.controller;
 
-import com.office.brewdesk.attendance.dto.AttendanceRecordResponse;
-import com.office.brewdesk.attendance.dto.AttendanceRecordsPageResponse;
+import com.office.brewdesk.attendance.dto.*;
 import com.office.brewdesk.attendance.entity.AttendanceRecord;
 import com.office.brewdesk.attendance.enums.AttendanceStatus;
 import com.office.brewdesk.attendance.service.AttendanceCalculationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,27 +21,31 @@ public class AttendanceCalculationController {
 
     private final AttendanceCalculationService attendanceCalculationService;
 
-    // ── Calculate attendance for one employee/date ────────────────────────────
+    // -- Single calculation ----------------------------------------------------
 
     @PostMapping("/calculation")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','REPORTING_MANAGER')")
     public ResponseEntity<AttendanceRecordResponse> calculateAttendance(
             @RequestParam String employeeCode,
-            @RequestParam LocalDate attendanceDate
-    ) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate attendanceDate) {
         AttendanceRecord record =
-                attendanceCalculationService.calculateAttendance(
-                        employeeCode,
-                        attendanceDate
-                );
-
-        return ResponseEntity.ok(
-                attendanceCalculationService.mapToResponse(record)
-        );
+                attendanceCalculationService.calculateAttendance(employeeCode, attendanceDate);
+        return ResponseEntity.ok(attendanceCalculationService.mapToResponse(record));
     }
 
-    // ── Paginated filtered records list ───────────────────────────────────────
+    // -- Bulk calculation ------------------------------------------------------
+
+    @PostMapping("/calculation/bulk")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
+    public ResponseEntity<BulkCalculationResponse> bulkCalculate(
+            @Valid @RequestBody BulkCalculationRequest request) {
+        return ResponseEntity.ok(attendanceCalculationService.bulkCalculate(request));
+    }
+
+    // -- Paginated records list ------------------------------------------------
 
     @GetMapping("/records")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','REPORTING_MANAGER')")
     public ResponseEntity<AttendanceRecordsPageResponse> getRecords(
             @RequestParam(required = false) String employeeCode,
             @RequestParam(required = false)
@@ -49,25 +54,21 @@ public class AttendanceCalculationController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
             @RequestParam(required = false) AttendanceStatus status,
             @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
+            @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(
                 attendanceCalculationService.getRecords(
-                        employeeCode, dateFrom, dateTo, status, page, size
-                )
-        );
+                        employeeCode, dateFrom, dateTo, status, page, size));
     }
 
-    // ── Monthly calendar data (all days in a month for one employee) ──────────
+    // -- Monthly records (calendar view) --------------------------------------
 
     @GetMapping("/records/month")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','REPORTING_MANAGER','CHEF','EMPLOYEE')")
     public ResponseEntity<List<AttendanceRecordResponse>> getMonthRecords(
             @RequestParam String employeeCode,
             @RequestParam int year,
-            @RequestParam int month
-    ) {
+            @RequestParam int month) {
         return ResponseEntity.ok(
-                attendanceCalculationService.getMonthRecords(employeeCode, year, month)
-        );
+                attendanceCalculationService.getMonthRecords(employeeCode, year, month));
     }
 }

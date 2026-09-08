@@ -1,12 +1,16 @@
 package com.office.brewdesk.attendance.service;
 
 import com.office.brewdesk.attendance.dto.AttendanceRecordResponse;
+import com.office.brewdesk.attendance.dto.BulkCalculationRequest;
+import com.office.brewdesk.attendance.dto.BulkCalculationResponse;
 import com.office.brewdesk.attendance.dto.AttendanceRecordsPageResponse;
 import com.office.brewdesk.attendance.dto.AttendanceSessionResponse;
 import com.office.brewdesk.attendance.entity.*;
 import com.office.brewdesk.attendance.enums.AttendanceEventType;
 import com.office.brewdesk.attendance.enums.AttendanceStatus;
 import com.office.brewdesk.attendance.repository.AttendanceRecordSpecification;
+import com.office.brewdesk.attendance.dto.BulkCalculationRequest;
+import com.office.brewdesk.attendance.dto.BulkCalculationResponse;
 import com.office.brewdesk.attendance.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -377,6 +381,52 @@ public class AttendanceCalculationService {
                 )
                 .createdAt(record.getCreatedAt())
                 .updatedAt(record.getUpdatedAt())
+                .build();
+    }
+
+    // -- Bulk calculation ------------------------------------------------------
+
+    public BulkCalculationResponse bulkCalculate(BulkCalculationRequest request) {
+        java.util.List<EmployeeProfile> employees;
+        if (request.getEmployeeCode() != null && !request.getEmployeeCode().isBlank()) {
+            EmployeeProfile emp = employeeProfileRepository
+                    .findByEmployeeCode(request.getEmployeeCode().trim())
+                    .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+            employees = java.util.List.of(emp);
+        } else {
+            employees = employeeProfileRepository.findAll()
+                    .stream()
+                    .filter(e -> Boolean.TRUE.equals(e.getActive()))
+                    .toList();
+        }
+        int successCount = 0;
+        int skippedCount = 0;
+        int errorCount   = 0;
+        java.util.List<String> errors = new java.util.ArrayList<>();
+        java.time.LocalDate cursor = request.getDateFrom();
+        while (!cursor.isAfter(request.getDateTo())) {
+            java.time.LocalDate date = cursor;
+            for (EmployeeProfile emp : employees) {
+                if (emp.getShift() == null) { skippedCount++; continue; }
+                try {
+                    calculateAttendance(emp.getEmployeeCode(), date);
+                    successCount++;
+                } catch (Exception ex) {
+                    errorCount++;
+                    errors.add(emp.getEmployeeCode() + " / " + date + ": " + ex.getMessage());
+                }
+            }
+            cursor = cursor.plusDays(1);
+        }
+        long totalDays = java.time.temporal.ChronoUnit.DAYS.between(
+                request.getDateFrom(), request.getDateTo()) + 1;
+        return BulkCalculationResponse.builder()
+                .totalDays((int) totalDays)
+                .totalEmployees(employees.size())
+                .successCount(successCount)
+                .skippedCount(skippedCount)
+                .errorCount(errorCount)
+                .errors(errors)
                 .build();
     }
 }

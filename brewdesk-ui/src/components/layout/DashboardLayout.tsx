@@ -2,7 +2,6 @@
 
 import { useAuth } from '@/hooks/useAuth'
 import { getUnauthorizedRedirect } from '@/lib/roles'
-import { cn } from '@/lib/utils'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Header } from './Header'
@@ -42,8 +41,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading BrewDesk…</p>
+          {/* Teal spinner — matches new primary */}
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+          <p className="text-[13px] text-muted-foreground">Loading BrewDesk…</p>
         </div>
       </div>
     )
@@ -53,6 +53,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+
       {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:shrink-0">
         <Sidebar />
@@ -62,10 +63,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="relative z-50 h-full w-64 animate-in slide-in-from-left duration-200">
+          <div className="relative z-50 h-full w-60 animate-in slide-in-from-left duration-200">
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </div>
         </div>
@@ -74,7 +75,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className={cn('flex-1 overflow-y-auto px-4 py-6 lg:px-6')}>
+        <main className="flex-1 overflow-y-auto px-4 py-5 lg:px-6 lg:py-6">
           {children}
         </main>
       </div>

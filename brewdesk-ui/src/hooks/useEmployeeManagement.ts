@@ -1,56 +1,68 @@
-'use client'
+﻿"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { createEmployee, getEmployees, updateEmployeeShift } from '@/api/attendance'
-import { CreateEmployeeRequest } from '@/types/attendance'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  createEmployee,
+  getEmployees,
+  updateEmployee,
+  updateEmployeeShift,
+} from "@/api/attendance";
+import { CreateEmployeeRequest, UpdateEmployeeRequest } from "@/types/attendance";
 
 export const employeeKeys = {
-  all: ['attendance', 'employees'] as const,
-}
+  all: ["attendance", "employees"] as const,
+};
 
-function getApiErrorMessage(error: unknown, fallback: string): string {
-  if (typeof error === 'object' && error !== null) {
-    const err = error as { response?: { data?: { message?: string } }; message?: string }
-    return err.response?.data?.message || err.message || fallback
+function apiMsg(error: unknown, fallback: string): string {
+  if (typeof error === "object" && error !== null) {
+    const e = error as { response?: { data?: { message?: string } }; message?: string };
+    return e.response?.data?.message || e.message || fallback;
   }
-  return fallback
+  return fallback;
 }
 
 export function useEmployeesQuery() {
-  return useQuery({
-    queryKey: employeeKeys.all,
-    queryFn: getEmployees,
-  })
+  return useQuery({ queryKey: employeeKeys.all, queryFn: getEmployees });
 }
 
 export function useCreateEmployee() {
-  const queryClient = useQueryClient()
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (request: CreateEmployeeRequest) => createEmployee(request),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.all })
-      toast.success('Employee created successfully')
+      qc.invalidateQueries({ queryKey: employeeKeys.all });
+      toast.success("Employee created successfully");
     },
-    onError: (error: unknown) => {
-      toast.error(getApiErrorMessage(error, 'Failed to create employee'))
+    onError: (err: unknown) =>
+      toast.error(apiMsg(err, "Failed to create employee")),
+  });
+}
+
+export function useUpdateEmployee() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, request }: { id: number; request: UpdateEmployeeRequest }) =>
+      updateEmployee(id, request),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: employeeKeys.all });
+      toast.success("Employee updated successfully");
     },
-  })
+    onError: (err: unknown) =>
+      toast.error(apiMsg(err, "Failed to update employee")),
+  });
 }
 
 export function useUpdateEmployeeShift() {
-  const queryClient = useQueryClient()
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ employeeId, shiftId }: { employeeId: number; shiftId: number }) =>
       updateEmployeeShift(employeeId, shiftId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.all })
-      toast.success('Employee shift updated successfully')
+      qc.invalidateQueries({ queryKey: employeeKeys.all });
+      toast.success("Employee shift updated");
     },
-    onError: (error: unknown) => {
-      toast.error(getApiErrorMessage(error, 'Failed to update employee shift'))
-    },
-  })
+    onError: (err: unknown) =>
+      toast.error(apiMsg(err, "Failed to update employee shift")),
+  });
 }

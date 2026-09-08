@@ -8,6 +8,7 @@ import { useAttendanceCalculation } from '@/hooks/useAttendance'
 import { simulatePunch, calculateAttendance } from '@/api/attendance'
 import { getErrorMessage, formatAttendanceTime, formatWorkMinutes, formatLateMinutes, formatAttendanceDate } from '@/lib/utils'
 import { SimulatePunchFormValues } from '@/schemas/attendance.schema'
+import { isManagement } from '@/types/auth'
 import { PunchSimulatorForm } from '@/features/attendance/components/PunchSimulatorForm'
 import { PunchLogList, PunchLogEntry } from '@/features/attendance/components/PunchLogList'
 import { AttendanceStatusBadge } from '@/features/attendance/components/AttendanceStatusBadge'
@@ -28,7 +29,7 @@ import {
 
 export default function PunchSimulatorPage() {
   const { user } = useAuth()
-  const isAdmin = user?.role === 'ADMIN'
+  const isAdmin = isManagement(user?.role)
 
   const { data: employees = [], isLoading: employeesLoading } = useEmployeesQuery()
 

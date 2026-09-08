@@ -1,34 +1,64 @@
 'use client'
 
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { AttendanceCalculationResponse, AttendanceStatus } from '@/types/attendance'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-// ── Status config — greytHR colour coding ─────────────────────────────────────
+// ── Status config — Rippling colour palette ───────────────────────────────────
 
 const STATUS_CONFIG: Record<
   AttendanceStatus,
-  { code: string; textClass: string; bgClass: string; label: string }
+  { code: string; label: string; cellBg: string; codeClass: string; dotClass: string }
 > = {
-  PRESENT:    { code: 'P',  textClass: 'text-emerald-600 dark:text-emerald-400', bgClass: 'bg-emerald-50 dark:bg-emerald-900/20',  label: 'Present' },
-  ABSENT:     { code: 'A',  textClass: 'text-red-500 dark:text-red-400',         bgClass: 'bg-red-50 dark:bg-red-900/20',           label: 'Absent' },
-  HALF_DAY:   { code: 'HD', textClass: 'text-amber-600 dark:text-amber-400',     bgClass: 'bg-amber-50 dark:bg-amber-900/20',       label: 'Half Day' },
-  INCOMPLETE: { code: 'I',  textClass: 'text-orange-500 dark:text-orange-400',   bgClass: 'bg-orange-50 dark:bg-orange-900/20',     label: 'Incomplete' },
-  WEEK_OFF:   { code: 'WO', textClass: 'text-slate-400',                         bgClass: '',                                       label: 'Week Off' },
-  HOLIDAY:    { code: 'H',  textClass: 'text-blue-500 dark:text-blue-400',       bgClass: 'bg-blue-50 dark:bg-blue-900/20',         label: 'Holiday' },
-  ON_LEAVE:   { code: 'L',  textClass: 'text-purple-500 dark:text-purple-400',   bgClass: 'bg-purple-50 dark:bg-purple-900/20',     label: 'On Leave' },
+  PRESENT:    {
+    code: 'P',  label: 'Present',
+    cellBg:   'bg-teal-50 dark:bg-teal-900/15',
+    codeClass: 'text-teal-700 dark:text-teal-400',
+    dotClass:  'bg-teal-500',
+  },
+  ABSENT:     {
+    code: 'A',  label: 'Absent',
+    cellBg:   'bg-red-50 dark:bg-red-900/15',
+    codeClass: 'text-red-500 dark:text-red-400',
+    dotClass:  'bg-red-500',
+  },
+  HALF_DAY:   {
+    code: 'HD', label: 'Half Day',
+    cellBg:   'bg-amber-50 dark:bg-amber-900/15',
+    codeClass: 'text-amber-600 dark:text-amber-400',
+    dotClass:  'bg-amber-500',
+  },
+  INCOMPLETE: {
+    code: 'I',  label: 'Incomplete',
+    cellBg:   'bg-orange-50 dark:bg-orange-900/15',
+    codeClass: 'text-orange-500 dark:text-orange-400',
+    dotClass:  'bg-orange-500',
+  },
+  WEEK_OFF:   {
+    code: 'WO', label: 'Week Off',
+    cellBg:   '',
+    codeClass: 'text-slate-400 dark:text-slate-500',
+    dotClass:  'bg-slate-300',
+  },
+  HOLIDAY:    {
+    code: 'H',  label: 'Holiday',
+    cellBg:   'bg-blue-50 dark:bg-blue-900/15',
+    codeClass: 'text-blue-500 dark:text-blue-400',
+    dotClass:  'bg-blue-500',
+  },
+  ON_LEAVE:   {
+    code: 'L',  label: 'On Leave',
+    cellBg:   'bg-purple-50 dark:bg-purple-900/15',
+    codeClass: 'text-purple-500 dark:text-purple-400',
+    dotClass:  'bg-purple-500',
+  },
 }
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Grid helpers ──────────────────────────────────────────────────────────────
 
 function buildGrid(year: number, month: number): (Date | null)[] {
   const first    = new Date(year, month - 1, 1)
@@ -57,31 +87,28 @@ function isToday(d: Date) {
 
 function Legend() {
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground px-1 pt-1 border-t border-border">
+    <div className="flex flex-wrap gap-x-4 gap-y-1 pt-3 border-t border-border">
       {Object.values(STATUS_CONFIG).map((cfg) => (
-        <span key={cfg.code} className="flex items-center gap-1">
-          <span className={cn('font-bold', cfg.textClass)}>{cfg.code}</span>
+        <span key={cfg.code} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', cfg.dotClass)} />
           <span>{cfg.label}</span>
         </span>
       ))}
-      <span className="flex items-center gap-1">
-        <span className="font-bold text-slate-400">WO</span>
-        <span>Weekend</span>
-      </span>
     </div>
   )
 }
 
-// ── Props / component ─────────────────────────────────────────────────────────
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface AttendanceCalendarProps {
-  records: AttendanceCalculationResponse[]
-  isLoading?: boolean
-  selectedDate?: string | null
-  onDateClick?: (date: string, record: AttendanceCalculationResponse | null) => void
-  /** 2-char shift code shown bottom-right of each cell, e.g. "M1" */
-  shiftCode?: string
+  records:        AttendanceCalculationResponse[]
+  isLoading?:     boolean
+  selectedDate?:  string | null
+  onDateClick?:   (date: string, record: AttendanceCalculationResponse | null) => void
+  shiftCode?:     string
 }
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function AttendanceCalendar({
   records,
@@ -113,36 +140,84 @@ export function AttendanceCalendar({
     if (month === 12) { setMonth(1); setYear((y) => y + 1) } else setMonth((m) => m + 1)
   }
 
+  // Summary counts for the month
+  const summary = useMemo(() => {
+    const counts: Record<string, number> = {}
+    Object.values(recordMap).forEach((r) => {
+      counts[r.status] = (counts[r.status] ?? 0) + 1
+    })
+    return counts
+  }, [recordMap])
+
   return (
-    <TooltipProvider delayDuration={150}>
+    <TooltipProvider delayDuration={100}>
       <div className="space-y-3 select-none">
 
         {/* ── Month navigation ── */}
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between">
           <button
+            type="button"
             onClick={goToPrev}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Previous month"
           >
-            <ChevronLeft className="h-4 w-4" />Prev
+            <ChevronLeft className="h-4 w-4" />
           </button>
-          <h3 className="text-base font-semibold">{monthLabel}</h3>
+
+          <div className="text-center">
+            <h3
+              className="text-[14px] font-semibold text-foreground"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              {monthLabel}
+            </h3>
+            {/* Mini summary pills */}
+            <div className="flex items-center justify-center gap-2 mt-1">
+              {summary['PRESENT'] && (
+                <span className="text-[11px] text-teal-700 dark:text-teal-400 font-medium">
+                  {summary['PRESENT']}P
+                </span>
+              )}
+              {summary['ABSENT'] && (
+                <span className="text-[11px] text-red-500 dark:text-red-400 font-medium">
+                  {summary['ABSENT']}A
+                </span>
+              )}
+              {summary['HALF_DAY'] && (
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                  {summary['HALF_DAY']}HD
+                </span>
+              )}
+              {summary['INCOMPLETE'] && (
+                <span className="text-[11px] text-orange-500 dark:text-orange-400 font-medium">
+                  {summary['INCOMPLETE']}I
+                </span>
+              )}
+            </div>
+          </div>
+
           <button
+            type="button"
             onClick={goToNext}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Next month"
           >
-            Next<ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
 
-        {/* ── Day headers ── */}
-        <div className="grid grid-cols-7 pb-1 border-b border-border">
+        {/* ── Day-of-week headers ── */}
+        <div className="grid grid-cols-7 border-b border-border pb-1.5">
           {DAYS.map((d) => (
-            <div key={d} className={cn(
-              'text-center text-xs font-semibold py-1.5',
-              d === 'Sun' || d === 'Sat'
-                ? 'text-blue-500 dark:text-blue-400'
-                : 'text-muted-foreground',
-            )}>
+            <div
+              key={d}
+              className={cn(
+                'text-center text-[11px] font-semibold py-1',
+                d === 'Sun' || d === 'Sat'
+                  ? 'text-blue-400 dark:text-blue-500'
+                  : 'text-muted-foreground',
+              )}
+            >
               {d}
             </div>
           ))}
@@ -150,15 +225,25 @@ export function AttendanceCalendar({
 
         {/* ── Grid ── */}
         {isLoading ? (
-          <div className="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden">
+          <div className="grid grid-cols-7 gap-0.5">
             {Array.from({ length: 35 }).map((_, i) => (
-              <div key={i} className="bg-card h-[80px] animate-pulse" />
+              <div
+                key={i}
+                className="h-[68px] rounded-md bg-muted animate-pulse"
+              />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden">
+          <div className="grid grid-cols-7 gap-0.5">
             {grid.map((date, idx) => {
-              if (!date) return <div key={`pad-${idx}`} className="bg-card min-h-[80px]" />
+              if (!date) {
+                return (
+                  <div
+                    key={`pad-${idx}`}
+                    className="h-[68px] rounded-md bg-transparent"
+                  />
+                )
+              }
 
               const iso    = toIso(date)
               const record = recordMap[iso] ?? null
@@ -166,67 +251,108 @@ export function AttendanceCalendar({
               const today_ = isToday(date)
               const wknd   = isWeekend(date)
               const sel    = selectedDate === iso
-              const future = toIso(date) > toIso(today)
+              const future = iso > toIso(today)
+              const clickable = !future && !!onDateClick
 
               return (
                 <Tooltip key={iso}>
                   <TooltipTrigger asChild>
                     <button
                       type="button"
-                      onClick={() => !future && onDateClick?.(iso, record)}
+                      onClick={() => clickable && onDateClick?.(iso, record)}
+                      disabled={future || !onDateClick}
                       className={cn(
-                        'relative flex flex-col items-start p-1.5 min-h-[80px] w-full text-left',
+                        'relative flex flex-col items-start p-1.5 h-[68px] w-full rounded-md text-left',
                         'transition-colors duration-100',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400',
-                        cfg?.bgClass || 'bg-card',
-                        !cfg && wknd && 'bg-slate-50 dark:bg-slate-900/30',
-                        today_ && 'ring-2 ring-inset ring-amber-500 z-10',
-                        sel && !today_ && 'ring-2 ring-inset ring-blue-400 z-10',
-                        !future && onDateClick ? 'cursor-pointer hover:brightness-[0.97] dark:hover:brightness-110' : 'cursor-default',
-                        future && 'opacity-40',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:z-10',
+
+                        // Base background
+                        cfg?.cellBg || (wknd ? 'bg-slate-50 dark:bg-slate-900/20' : 'bg-white dark:bg-card/50'),
+
+                        // Selected ring
+                        sel && !today_ && 'ring-2 ring-teal-400 ring-inset z-10',
+
+                        // Today ring
+                        today_ && 'ring-2 ring-teal-600 ring-inset z-10',
+
+                        // Hover
+                        clickable && !future && 'hover:brightness-[0.97] dark:hover:brightness-[1.08] cursor-pointer',
+
+                        // Future fade
+                        future && 'opacity-30 cursor-default',
                       )}
                     >
                       {/* Date number */}
                       <span className={cn(
-                        'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                        today_ ? 'bg-amber-500 text-white'
-                          : wknd ? 'text-blue-500 dark:text-blue-400'
+                        'inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold leading-none',
+                        today_
+                          ? 'bg-teal-600 text-white'
+                          : wknd
+                          ? 'text-blue-400 dark:text-blue-500'
                           : 'text-foreground',
                       )}>
                         {date.getDate()}
                       </span>
 
-                      {/* Weekend label (no record) */}
-                      {wknd && !cfg && (
-                        <span className="absolute top-1 right-1.5 text-[10px] font-semibold text-slate-300 dark:text-slate-600">
-                          WO
-                        </span>
-                      )}
-
                       {/* Status code */}
                       {cfg && (
-                        <span className={cn('mt-1 text-sm font-black leading-none', cfg.textClass)}>
+                        <span className={cn('mt-1 text-[12px] font-bold leading-none', cfg.codeClass)}>
                           {cfg.code}
                         </span>
                       )}
 
-                      {/* Shift code */}
+                      {/* Weekend label (no record) */}
+                      {wknd && !cfg && (
+                        <span className="absolute bottom-1 right-1.5 text-[9px] font-semibold text-slate-300 dark:text-slate-600">
+                          WO
+                        </span>
+                      )}
+
+                      {/* Shift code pill */}
                       {shiftCode && !future && (
-                        <span className="absolute bottom-1 right-1.5 text-[10px] font-medium text-muted-foreground/50">
+                        <span className="absolute bottom-1 right-1.5 text-[9px] font-medium text-muted-foreground/40">
                           {shiftCode}
                         </span>
+                      )}
+
+                      {/* Status dot — bottom-left indicator bar */}
+                      {cfg && (
+                        <span className={cn(
+                          'absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-t-full',
+                          cfg.dotClass,
+                        )} />
                       )}
                     </button>
                   </TooltipTrigger>
 
-                  {/* Tooltip — only when there's a record */}
-                  {record && cfg && (
-                    <TooltipContent side="top" className="space-y-1 max-w-[180px]">
-                      <p className={cn('font-semibold text-xs', cfg.textClass)}>{cfg.label}</p>
-                      {record.firstIn   && <p className="text-xs">In: {new Date(record.firstIn).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>}
-                      {record.lastOut   && <p className="text-xs">Out: {new Date(record.lastOut).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>}
-                      {record.totalWorkMinutes > 0 && <p className="text-xs">Work: {Math.floor(record.totalWorkMinutes / 60)}h {record.totalWorkMinutes % 60}m</p>}
-                      {record.lateMinutes > 0       && <p className="text-xs text-amber-500">Late: {record.lateMinutes} min</p>}
+                  {/* Tooltip */}
+                  {record && cfg && !future && (
+                    <TooltipContent side="top" className="space-y-1 max-w-[200px] p-3">
+                      <p className={cn('text-[12px] font-semibold', cfg.codeClass)}>{cfg.label}</p>
+                      {record.firstIn && (
+                        <p className="text-[11px] text-muted-foreground">
+                          In: <span className="font-mono font-medium text-foreground">
+                            {new Date(record.firstIn).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </p>
+                      )}
+                      {record.lastOut && (
+                        <p className="text-[11px] text-muted-foreground">
+                          Out: <span className="font-mono font-medium text-foreground">
+                            {new Date(record.lastOut).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </p>
+                      )}
+                      {record.totalWorkMinutes > 0 && (
+                        <p className="text-[11px] text-muted-foreground">
+                          Work: <span className="font-medium text-foreground">
+                            {Math.floor(record.totalWorkMinutes / 60)}h {record.totalWorkMinutes % 60}m
+                          </span>
+                        </p>
+                      )}
+                      {record.lateMinutes > 0 && (
+                        <p className="text-[11px] text-amber-600">Late {record.lateMinutes}m</p>
+                      )}
                     </TooltipContent>
                   )}
                 </Tooltip>

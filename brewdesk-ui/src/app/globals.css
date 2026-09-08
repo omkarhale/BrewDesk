@@ -1,116 +1,192 @@
 @import "tailwindcss";
 
-/* ── Design tokens ────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BREWDESK DESIGN SYSTEM  —  Rippling-inspired
+   Palette inspiration: Rippling's light mode — pure white surfaces,
+   warm off-white canvas (#F7F7F5), teal-green primary (#009B77 / #00897B),
+   graphite text, hairline borders, Inter + DM Sans typography.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --primary: 27 96% 40%;
+  /* ── Canvas & Surfaces ──────────────────────────────────────────────────── */
+  --background:         36 14% 97%;      /* #F7F6F3 — warm off-white page canvas  */
+  --foreground:         220 15% 15%;     /* #1E2230 — graphite text               */
+
+  --card:               0 0% 100%;       /* #FFFFFF — pure white cards            */
+  --card-foreground:    220 15% 15%;
+
+  --popover:            0 0% 100%;
+  --popover-foreground: 220 15% 15%;
+
+  /* ── Brand / Primary — Rippling teal-green ──────────────────────────────── */
+  --primary:            173 100% 30%;    /* #009B77 — teal-green                  */
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
-  --destructive: 0 84% 60%;
+
+  /* ── Secondary / Muted ──────────────────────────────────────────────────── */
+  --secondary:          210 20% 96%;     /* #F1F3F6 — cool-grey tint              */
+  --secondary-foreground: 220 15% 30%;
+
+  --muted:              210 16% 95%;     /* #EEF0F4                               */
+  --muted-foreground:   215 14% 50%;     /* #7A8299 — subdued label text          */
+
+  --accent:             173 60% 94%;     /* #E6F5F2 — teal tint for hover         */
+  --accent-foreground:  173 100% 25%;
+
+  /* ── Destructive ────────────────────────────────────────────────────────── */
+  --destructive:        0 72% 51%;       /* #DC2626                               */
   --destructive-foreground: 0 0% 100%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 27 96% 40%;
-  --sidebar: 0 0% 99%;
-  --radius: 0.75rem;
+
+  /* ── Borders & Inputs ───────────────────────────────────────────────────── */
+  --border:             220 13% 91%;     /* #E4E7EE — hairline, barely visible    */
+  --input:              220 13% 91%;
+  --ring:               173 100% 30%;   /* teal focus ring                       */
+
+  /* ── Sidebar ────────────────────────────────────────────────────────────── */
+  --sidebar:            0 0% 100%;       /* pure white sidebar                    */
+  --sidebar-border:     220 13% 91%;
+
+  /* ── Radius ─────────────────────────────────────────────────────────────── */
+  --radius: 0.5rem;                      /* 8px — Rippling uses tighter radii     */
 }
 
+/* ── Dark mode ──────────────────────────────────────────────────────────── */
 .dark {
-  --background: 222 47% 6%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 8%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 8%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 27 96% 50%;
+  --background:         222 25% 8%;
+  --foreground:         210 30% 96%;
+
+  --card:               222 22% 11%;
+  --card-foreground:    210 30% 96%;
+
+  --popover:            222 22% 11%;
+  --popover-foreground: 210 30% 96%;
+
+  --primary:            173 80% 42%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 217 33% 14%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 14%;
-  --muted-foreground: 215 20% 55%;
-  --accent: 217 33% 14%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 63% 31%;
+
+  --secondary:          217 22% 16%;
+  --secondary-foreground: 210 30% 90%;
+
+  --muted:              217 22% 16%;
+  --muted-foreground:   215 16% 52%;
+
+  --accent:             173 40% 18%;
+  --accent-foreground:  173 80% 70%;
+
+  --destructive:        0 60% 42%;
   --destructive-foreground: 0 0% 100%;
-  --border: 217 33% 18%;
-  --input: 217 33% 18%;
-  --ring: 27 96% 50%;
-  --sidebar: 222 47% 7%;
+
+  --border:             217 22% 20%;
+  --input:              217 22% 20%;
+  --ring:               173 80% 42%;
+
+  --sidebar:            222 25% 9%;
+  --sidebar-border:     217 22% 18%;
 }
 
-/* ── Tailwind v4 theme mapping ────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   TAILWIND v4 THEME MAPPING
+   ═══════════════════════════════════════════════════════════════════════════ */
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
+  --color-background:         hsl(var(--background));
+  --color-foreground:         hsl(var(--foreground));
+  --color-card:               hsl(var(--card));
+  --color-card-foreground:    hsl(var(--card-foreground));
+  --color-popover:            hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
+  --color-primary:            hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
+  --color-secondary:          hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
+  --color-muted:              hsl(var(--muted));
+  --color-muted-foreground:   hsl(var(--muted-foreground));
+  --color-accent:             hsl(var(--accent));
+  --color-accent-foreground:  hsl(var(--accent-foreground));
+  --color-destructive:        hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-sidebar: hsl(var(--sidebar));
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-border:             hsl(var(--border));
+  --color-input:              hsl(var(--input));
+  --color-ring:               hsl(var(--ring));
+  --color-sidebar:            hsl(var(--sidebar));
+
+  /* ── Typography — Inter primary, DM Sans display, JetBrains Mono code ── */
+  --font-sans:  var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-dm-sans), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono:  var(--font-mono), 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* ── Radius scale ──────────────────────────────────────────────────────── */
+  --radius-xs:  calc(var(--radius) - 4px);   /* 4px  */
+  --radius-sm:  calc(var(--radius) - 2px);   /* 6px  */
+  --radius-md:  var(--radius);               /* 8px  */
+  --radius-lg:  calc(var(--radius) + 4px);   /* 12px */
+  --radius-xl:  calc(var(--radius) + 8px);   /* 16px */
+  --radius-2xl: calc(var(--radius) + 16px);  /* 24px */
 }
 
-/* ── Base styles ──────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
 * {
   border-color: hsl(var(--border));
+  box-sizing: border-box;
+}
+
+html {
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';  /* Inter OpenType */
+  text-rendering: optimizeLegibility;
 }
 
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────────────────── */
+/* Headings use DM Sans */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Monospace for codes, times, IDs */
+.font-mono, code, pre, kbd {
+  font-family: var(--font-mono);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR  —  minimal, Rippling-style
+   ═══════════════════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background-color: hsl(var(--border));
-  border-radius: 3px;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.4);
 }
 
-/* ── Focus ring ───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOCUS RING  —  teal, tight
+   ═══════════════════════════════════════════════════════════════════════════ */
 :focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* ── Utility: ring-ring ───────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITY OVERRIDES (Tailwind compatibility)
+   ═══════════════════════════════════════════════════════════════════════════ */
 .ring-ring {
   --tw-ring-color: hsl(var(--ring));
 }
@@ -118,7 +194,9 @@ body {
   --tw-ring-offset-color: hsl(var(--background));
 }
 
-/* ── Animate-in / animate-out (Radix-compatible) ─────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS  —  Radix-compatible
+   ═══════════════════════════════════════════════════════════════════════════ */
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -155,23 +233,79 @@ body {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes slide-in-from-bottom-2 {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-.animate-in { animation-fill-mode: both; }
+.animate-in  { animation-fill-mode: both; }
 .animate-out { animation-fill-mode: both; }
-.fade-in-0   { animation-name: fade-in;     animation-duration: 150ms; }
-.fade-out-0  { animation-name: fade-out;    animation-duration: 150ms; }
-.zoom-in-95  { animation-name: zoom-in-95;  animation-duration: 150ms; }
-.zoom-out-95 { animation-name: zoom-out-95; animation-duration: 150ms; }
-.slide-in-from-left   { animation-name: slide-in-from-left;   animation-duration: 300ms; }
-.slide-in-from-right  { animation-name: slide-in-from-right;  animation-duration: 300ms; }
-.slide-out-to-right   { animation-name: slide-out-to-right;   animation-duration: 300ms; }
-.slide-out-to-left    { animation-name: slide-out-to-left;    animation-duration: 300ms; }
-.slide-in-from-top-2  { animation-name: slide-in-from-top-2;  animation-duration: 150ms; }
+
+.fade-in-0    { animation-name: fade-in;    animation-duration: 120ms; animation-timing-function: ease-out; }
+.fade-out-0   { animation-name: fade-out;   animation-duration: 120ms; animation-timing-function: ease-in;  }
+.zoom-in-95   { animation-name: zoom-in-95; animation-duration: 120ms; animation-timing-function: ease-out; }
+.zoom-out-95  { animation-name: zoom-out-95;animation-duration: 120ms; animation-timing-function: ease-in;  }
+
+.slide-in-from-left   { animation-name: slide-in-from-left;   animation-duration: 250ms; animation-timing-function: cubic-bezier(0.16,1,0.3,1); }
+.slide-in-from-right  { animation-name: slide-in-from-right;  animation-duration: 250ms; animation-timing-function: cubic-bezier(0.16,1,0.3,1); }
+.slide-out-to-right   { animation-name: slide-out-to-right;   animation-duration: 200ms; animation-timing-function: ease-in; }
+.slide-out-to-left    { animation-name: slide-out-to-left;    animation-duration: 200ms; animation-timing-function: ease-in; }
+.slide-in-from-top-2  { animation-name: slide-in-from-top-2;  animation-duration: 120ms; animation-timing-function: ease-out; }
+.slide-in-from-bottom-2 { animation-name: slide-in-from-bottom-2; animation-duration: 120ms; animation-timing-function: ease-out; }
+
 .duration-200 { animation-duration: 200ms; }
 
-[data-state="open"].data-\[state\=open\]\:animate-in   { animation-fill-mode: both; }
+[data-state="open"].data-\[state\=open\]\:animate-in    { animation-fill-mode: both; }
 [data-state="closed"].data-\[state\=closed\]\:animate-out { animation-fill-mode: both; }
-[data-state="open"].data-\[state\=open\]\:fade-in-0   { animation-name: fade-in;    animation-duration: 150ms; }
-[data-state="closed"].data-\[state\=closed\]\:fade-out-0 { animation-name: fade-out;   animation-duration: 150ms; }
-[data-state="open"].data-\[state\=open\]\:zoom-in-95  { animation-name: zoom-in-95; animation-duration: 150ms; }
-[data-state="closed"].data-\[state\=closed\]\:zoom-out-95 { animation-name: zoom-out-95; animation-duration: 150ms; }
+[data-state="open"].data-\[state\=open\]\:fade-in-0     { animation-name: fade-in;    animation-duration: 120ms; }
+[data-state="closed"].data-\[state\=closed\]\:fade-out-0  { animation-name: fade-out;   animation-duration: 120ms; }
+[data-state="open"].data-\[state\=open\]\:zoom-in-95    { animation-name: zoom-in-95; animation-duration: 120ms; }
+[data-state="closed"].data-\[state\=closed\]\:zoom-out-95 { animation-name: zoom-out-95;animation-duration: 120ms; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RIPPLING-STYLE SURFACE UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Flat card — white, 1px hairline border, no shadow */
+.card-flat {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+}
+
+/* Elevated card — white with very subtle shadow (Rippling uses this sparingly) */
+.card-elevated {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+}
+
+/* Table header — Rippling uses a very light grey strip */
+.table-header-rippling {
+  background: hsl(220 20% 97%);
+  border-bottom: 1px solid hsl(var(--border));
+}
+.dark .table-header-rippling {
+  background: hsl(217 22% 14%);
+}
+
+/* Status dot */
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Teal pill — active nav link background */
+.nav-active {
+  background: hsl(173 60% 94%);
+  color: hsl(173 100% 25%);
+  font-weight: 500;
+}
+.dark .nav-active {
+  background: hsl(173 40% 18%);
+  color: hsl(173 80% 70%);
+}

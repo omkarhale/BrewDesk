@@ -1,6 +1,4 @@
 import { LucideIcon } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 interface AttendanceSummaryCardProps {
@@ -8,48 +6,67 @@ interface AttendanceSummaryCardProps {
   value: string
   icon: LucideIcon
   description?: string
+  /** Tailwind colour class for the icon background e.g. 'text-teal-600 bg-teal-50' */
   colorClass?: string
   isLoading?: boolean
 }
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function Pulse({ className }: { className?: string }) {
+  return <div className={cn('animate-pulse rounded-md bg-muted', className)} />
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
 
 export function AttendanceSummaryCard({
   title,
   value,
   icon: Icon,
   description,
-  colorClass = 'text-amber-600',
+  colorClass = 'text-teal-600 bg-teal-50 dark:bg-teal-900/20',
   isLoading,
 }: AttendanceSummaryCardProps) {
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-            <Skeleton className="h-8 w-8 rounded-lg" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-7 w-20" />
-        </CardContent>
-      </Card>
+      <div className="card-flat p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <Pulse className="h-3.5 w-20" />
+          <Pulse className="h-8 w-8 rounded-lg" />
+        </div>
+        <Pulse className="h-7 w-24" />
+        <Pulse className="h-3 w-28" />
+      </div>
     )
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-          <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg bg-muted', colorClass)}>
-            <Icon className="h-4 w-4" />
-          </div>
+    <div className="card-flat p-4 hover:shadow-sm transition-shadow duration-150 group">
+      {/* Header row */}
+      <div className="flex items-start justify-between mb-3">
+        <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider leading-none">
+          {title}
+        </p>
+        <div className={cn(
+          'flex h-8 w-8 items-center justify-center rounded-lg shrink-0',
+          colorClass,
+        )}>
+          <Icon className="h-4 w-4" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold text-foreground">{value}</p>
-        {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Value */}
+      <p
+        className="text-[22px] font-semibold text-foreground leading-none tracking-tight"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
+        {value}
+      </p>
+
+      {/* Description */}
+      {description && (
+        <p className="mt-1.5 text-[12px] text-muted-foreground leading-tight">{description}</p>
+      )}
+    </div>
   )
 }
