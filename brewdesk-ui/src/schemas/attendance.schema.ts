@@ -144,3 +144,149 @@ export const simulatePunchSchema = z.object({
 })
 
 export type SimulatePunchFormValues = z.infer<typeof simulatePunchSchema>
+
+// ── Regularization schemas ───────────────────────────────────────────────────
+// Mirror backend RegularizationService.validateFieldsByType
+
+const REGULARIZATION_REASON_MIN = 10
+const REGULARIZATION_REASON_MAX = 500
+const REJECTION_REASON_MIN      = 5
+const REJECTION_REASON_MAX      = 500
+
+const isoDateTimeRegex =
+  /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/
+
+const regularizationType = z.enum([
+  'MISSED_PUNCH',
+  'INCORRECT_PUNCH',
+  'LATE_ARRIVAL',
+  'EARLY_EXIT',
+  'HALF_DAY',
+  'FULL_DAY',
+])
+
+const halfDayType = z.enum(['FIRST_HALF', 'SECOND_HALF'])
+
+const reasonField = z
+  .string()
+  .trim()
+  .min(REGULARIZATION_REASON_MIN, `Reason must be at least ${REGULARIZATION_REASON_MIN} characters`)
+  .max(REGULARIZATION_REASON_MAX, `Reason must not exceed ${REGULARIZATION_REASON_MAX} characters`)
+
+const isoDateTime = (label: string) =>
+  z
+    .string()
+    .trim()
+    .optional()
+    .nullable()
+    .refine(
+      (v) => v == null || v === '' || isoDateTimeRegex.test(v),
+      `${label} must be a valid ISO date-time (YYYY-MM-DDTHH:MM)`,
+    )
+
+export const submitRegularizationSchema = z
+  .object({
+    attendanceDate: z
+      .string()
+      .min(1, 'Attendance date is required')
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Attendance date must be in YYYY-MM-DD format'),
+    type: regularizationType,
+    requestedPunchIn:  isoDateTime('Punch-in time'),
+    requestedPunchOut: isoDateTime('Punch-out time'),
+    halfDayType: halfDayType.optional().nullable(),
+    reason: reasonField,
+  })
+  .superRefine((data, ctx) => {
+    // halfDayType only permitted for HALF_DAY
+    if (data.type !== 'HALF_DAY' && data.halfDayType != null) {
+      ctx.addIssue({
+        code:    z.ZodIssueCode.custom,
+        path:    ['halfDayType'],
+        message: 'Half-day type is only valid for HALF_DAY requests',
+      })
+    }
+
+    const inSet  = data.requestedPunchIn  != null && data.requestedPunchIn  !== ''
+    const outSet = data.requestedPunchOut != null && data.requestedPunchOut !== ''
+
+    switch (data.type) {
+      case 'MISSED_PUNCH':
+        if (!inSet && !outSet) {
+          ctx.addIssue({
+            code:    z.ZodIssueCode.custom,
+            path:    ['requestedPunchIn'],
+            message: 'At least one of punch-in or punch-out must be provided',
+          })
+        }
+        break
+      case 'INCORRECT_PUNCH':
+      case 'FULL_DAY':
+        if (!inSet) {
+          ctx.addIssue({
+            code:    z.ZodIssueCode.custom,
+            path:    ['requestedPunchIn'],
+            message: 'Both punch-in and punch-out are required',
+          })
+        }
+        if (!outSet) {
+          ctx.addIssue({
+            code:    z.ZodIssueCode.custom,
+            path:    ['requestedPunchOut'],
+            message: 'Both punch-in and punch-out are required',
+          })
+        }
+        break
+      case 'LATE_ARRIVAL':
+        if (!inSet) {
+          ctx.addIssue({
+            code:    z.ZodIssueCode.custom,
+            path:    ['requestedPunchIn'],
+            message: 'Punch-in time is required',
+          })
+        }
+        break
+      case 'EARLY_EXIT':
+        if (!outSet) {
+          ctx.addIssue({
+            code:    z.ZodIssueCode.custom,
+            path:    ['requestedPunchOut'],
+            message: 'Punch-out time is required',
+          })
+        }
+        break
+      case 'HALF_DAY':
+        if (data.halfDayType == null) {
+          ctx.addIssue({
+            code:    z.ZodIssueCode.custom,
+            path:    ['halfDayType'],
+            message: 'First half or second half must be selected',
+          })
+        }
+        break
+    }
+
+    // When both supplied, out must be strictly after in
+    if (inSet && outSet) {
+      const inT  = new Date(data.requestedPunchIn!).getTime()
+      const outT = new Date(data.requestedPunchOut!).getTime()
+      if (Number.isFinite(inT) && Number.isFinite(outT) && outT <= inT) {
+        ctx.addIssue({
+          code:    z.ZodIssueCode.custom,
+          path:    ['requestedPunchOut'],
+          message: 'Punch-out must be after punch-in',
+        })
+      }
+    }
+  })
+
+export type SubmitRegularizationFormValues = z.infer<typeof submitRegularizationSchema>
+
+export const rejectRegularizationSchema = z.object({
+  rejectionReason: z
+    .string()
+    .trim()
+    .min(REJECTION_REASON_MIN, `Rejection reason must be at least ${REJECTION_REASON_MIN} characters`)
+    .max(REJECTION_REASON_MAX, `Rejection reason must not exceed ${REJECTION_REASON_MAX} characters`),
+})
+
+export type RejectRegularizationFormValues = z.infer<typeof rejectRegularizationSchema>

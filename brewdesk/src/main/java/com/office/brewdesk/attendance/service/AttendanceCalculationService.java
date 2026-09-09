@@ -360,6 +360,11 @@ public class AttendanceCalculationService {
                 .id(record.getId())
                 .employeeId(record.getEmployee().getId())
                 .employeeCode(record.getEmployee().getEmployeeCode())
+                .employeeName(
+                        record.getEmployee().getUser() != null
+                                ? record.getEmployee().getUser().getName()
+                                : null
+                )
                 .shiftId(record.getShift().getId())
                 .shiftName(record.getShift().getName())
                 .attendanceDate(record.getAttendanceDate())

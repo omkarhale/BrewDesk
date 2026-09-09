@@ -119,6 +119,11 @@ public class EmployeeProfileService {
         return EmployeeResponse.builder()
                 .id(employee.getId())
                 .userId(employee.getUser().getId())
+                .userName(
+                        employee.getUser() != null
+                                ? employee.getUser().getName()
+                                : null
+                )
                 .employeeCode(employee.getEmployeeCode())
                 .departmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null)
                 .departmentName(employee.getDepartment() != null ? employee.getDepartment().getName() : null)

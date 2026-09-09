@@ -33,6 +33,10 @@ export function AttendanceDetailDrawer({ attendance, open, onOpenChange }: Atten
             </h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
+                <span className="text-muted-foreground">Name</span>
+                <span className="font-medium">{attendance.employeeName ?? attendance.employeeCode}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">Employee Code</span>
                 <span className="font-medium">{attendance.employeeCode}</span>
               </div>

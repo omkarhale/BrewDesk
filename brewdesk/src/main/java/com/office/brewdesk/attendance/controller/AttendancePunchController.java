@@ -61,6 +61,7 @@ public class AttendancePunchController {
         return EmployeeResponse.builder()
                 .id(p.getId())
                 .userId(p.getUser().getId())
+                .userName(p.getUser() != null ? p.getUser().getName() : null)
                 .employeeCode(p.getEmployeeCode())
                 .departmentId(p.getDepartment() != null ? p.getDepartment().getId() : null)
                 .departmentName(p.getDepartment() != null ? p.getDepartment().getName() : null)

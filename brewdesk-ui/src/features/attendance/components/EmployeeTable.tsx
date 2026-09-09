@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Pencil, Power, UserCircle2 } from "lucide-react";
 import { Department, Employee, Shift } from "@/types/attendance";
+import { UserResponse } from "@/types/user";
 import { cn, formatAttendanceDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/dashboard/EmptyState";
@@ -18,6 +19,7 @@ interface Props {
   onRefetch: () => void;
   shifts: Shift[];
   departments: Department[];
+  users: UserResponse[];
 }
 
 const TH = ({ children, className }: { children?: React.ReactNode; className?: string }) => (
@@ -46,7 +48,7 @@ function ToggleActiveButton({ employee, onDone }: { employee: Employee; onDone: 
   );
 }
 
-export function EmployeeTable({ employees, isLoading, error, onRetry, onAddEmployee, onRefetch, shifts, departments }: Props) {
+export function EmployeeTable({ employees, isLoading, error, onRetry, onAddEmployee, onRefetch, shifts, departments, users }: Props) {
   const [editTarget, setEditTarget] = useState<Employee | null>(null);
 
   if (isLoading) return (
@@ -76,7 +78,7 @@ export function EmployeeTable({ employees, isLoading, error, onRetry, onAddEmplo
       <div className="card-flat overflow-hidden">
         <table className="w-full">
           <thead><tr className="table-header-rippling">
-            <TH>Employee</TH><TH className="hidden sm:table-cell">Department</TH><TH className="hidden md:table-cell">Shift</TH><TH className="hidden lg:table-cell">Joined</TH><TH>Status</TH><TH className="w-20">&nbsp;</TH>
+            <TH>Employee</TH><TH className="hidden sm:table-cell">Department</TH><TH className="hidden md:table-cell">Shift</TH><TH className="hidden lg:table-cell">Joined</TH><TH>Status</TH><TH className="hidden lg:table-cell">Action</TH>
           </tr></thead>
           <tbody>
             {employees.map(e => (
@@ -87,6 +89,7 @@ export function EmployeeTable({ employees, isLoading, error, onRetry, onAddEmplo
                       <UserCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
+                      <p className="text-[13px] font-semibold">{users.find(user => user.id === e.userId)?.name ?? <span className="text-muted-foreground/40">—</span>}</p>
                       <p className="font-mono text-[12px] font-semibold">{e.employeeCode}</p>
                       {e.designation && <p className="text-[11px] text-muted-foreground">{e.designation}</p>}
                     </div>

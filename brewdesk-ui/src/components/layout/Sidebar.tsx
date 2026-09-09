@@ -10,10 +10,13 @@ import {
   Activity,
   Building2,
   CalendarDays,
+  CheckSquare,
   ChevronDown,
+  ClipboardCheck,
   ClipboardList,
   Clock,
   Coffee,
+  FileEdit,
   Fingerprint,
   Layers,
   LayoutDashboard,
@@ -61,30 +64,36 @@ const profileLeaf: NavLeaf = {
 const adminAttendanceGroup: NavGroup = {
   kind: 'group', id: 'attendance', label: 'Attendance', icon: Fingerprint,
   children: [
-    { kind: 'leaf', label: 'My Attendance', href: '/dashboard/attendance/my',         icon: CalendarDays },
-    { kind: 'leaf', label: 'Overview',      href: '/dashboard/attendance',             icon: LayoutDashboard },
-    { kind: 'leaf', label: 'Records',       href: '/dashboard/attendance/records',     icon: ScrollText },
-    { kind: 'leaf', label: 'Calendar',      href: '/dashboard/attendance/calendar',    icon: CalendarDays },
-    { kind: 'leaf', label: 'Employees',     href: '/dashboard/attendance/employees',   icon: UserCircle2 },
-    { kind: 'leaf', label: 'Departments',   href: '/dashboard/attendance/departments', icon: Building2 },
-    { kind: 'leaf', label: 'Shifts',        href: '/dashboard/attendance/shifts',      icon: Clock },
-    { kind: 'leaf', label: 'Simulator',     href: '/dashboard/attendance/simulator',   icon: TerminalSquare },
-    { kind: 'leaf', label: 'Events',         href: '/dashboard/attendance/events',      icon: Activity },
+    { kind: 'leaf', label: 'My Attendance',    href: '/dashboard/attendance/my',                         icon: CalendarDays },
+    { kind: 'leaf', label: 'Regularization',   href: '/dashboard/attendance/regularization',             icon: FileEdit },
+    { kind: 'leaf', label: 'Overview',          href: '/dashboard/attendance',                           icon: LayoutDashboard },
+    { kind: 'leaf', label: 'Records',           href: '/dashboard/attendance/records',                   icon: ScrollText },
+    { kind: 'leaf', label: 'Calendar',          href: '/dashboard/attendance/calendar',                  icon: CalendarDays },
+    { kind: 'leaf', label: 'Employees',         href: '/dashboard/attendance/employees',                 icon: UserCircle2 },
+    { kind: 'leaf', label: 'Departments',       href: '/dashboard/attendance/departments',               icon: Building2 },
+    { kind: 'leaf', label: 'Shifts',            href: '/dashboard/attendance/shifts',                    icon: Clock },
+    { kind: 'leaf', label: 'Approvals',         href: '/dashboard/attendance/regularization/approvals', icon: CheckSquare },
+    { kind: 'leaf', label: 'Reg. Monitor',      href: '/dashboard/attendance/regularization/admin',     icon: ClipboardCheck },
+    { kind: 'leaf', label: 'Simulator',         href: '/dashboard/attendance/simulator',                 icon: TerminalSquare },
+    { kind: 'leaf', label: 'Events',            href: '/dashboard/attendance/events',                    icon: Activity },
   ],
 }
 
 const managerAttendanceGroup: NavGroup = {
   kind: 'group', id: 'attendance', label: 'Attendance', icon: Fingerprint,
   children: [
-    { kind: 'leaf', label: 'My Attendance', href: '/dashboard/attendance/my',   icon: CalendarDays },
-    { kind: 'leaf', label: 'Team View',     href: '/dashboard/attendance/team', icon: Users },
+    { kind: 'leaf', label: 'My Attendance', href: '/dashboard/attendance/my',                          icon: CalendarDays },
+    { kind: 'leaf', label: 'Regularization',href: '/dashboard/attendance/regularization',              icon: FileEdit },
+    { kind: 'leaf', label: 'Team View',     href: '/dashboard/attendance/team',                        icon: Users },
+    { kind: 'leaf', label: 'Approvals',     href: '/dashboard/attendance/regularization/approvals',   icon: CheckSquare },
   ],
 }
 
 const staffAttendanceGroup: NavGroup = {
   kind: 'group', id: 'attendance', label: 'Attendance', icon: Fingerprint,
   children: [
-    { kind: 'leaf', label: 'My Attendance', href: '/dashboard/attendance/my', icon: CalendarDays },
+    { kind: 'leaf', label: 'My Attendance', href: '/dashboard/attendance/my',              icon: CalendarDays },
+    { kind: 'leaf', label: 'Regularization',href: '/dashboard/attendance/regularization',  icon: FileEdit },
   ],
 }
 

@@ -16,6 +16,7 @@ public class AttendanceRecordResponse {
 
     private Long employeeId;
     private String employeeCode;
+    private String employeeName;
 
     private Long shiftId;
     private String shiftName;

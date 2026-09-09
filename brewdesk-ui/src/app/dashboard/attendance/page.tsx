@@ -68,7 +68,8 @@ export default function AttendanceDashboard() {
                 <SelectContent>
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={emp.employeeCode}>
-                      {emp.employeeCode} - {emp.designation}
+                      {emp.userName ?? emp.employeeCode} — {emp.employeeCode}
+                      {emp.designation ? ` (${emp.designation})` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>

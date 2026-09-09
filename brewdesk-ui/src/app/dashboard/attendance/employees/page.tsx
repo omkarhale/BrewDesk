@@ -52,6 +52,7 @@ export default function EmployeesPage() {
         onRefetch={() => refetch()}
         shifts={shifts}
         departments={departments}
+        users={users}
       />
 
       <EmployeeFormDialog open={dialogOpen} onOpenChange={setDialogOpen} onSuccess={() => refetch()} users={users} departments={departments} shifts={shifts} />
