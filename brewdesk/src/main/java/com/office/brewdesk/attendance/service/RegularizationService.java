@@ -94,26 +94,50 @@ public class RegularizationService {
     }
 
     /**
-     * True when the reviewer may APPROVE / REJECT this request:
-     *   - ADMIN / SUPER_ADMIN (override / exception handling)
-     *   - the employee's configured reporting manager (User at emp.manager)
-     * A user may never act on their own request regardless of role.
+     * True when the reviewer may APPROVE / REJECT this request.
+     *
+     * Rules:
+     *   1. A user CANNOT approve their own request — no exceptions.
+     *      This is a governance rule: self-approval creates a conflict of interest.
+     *   2. SUPER_ADMIN and ADMIN can approve ANY other employee's request.
+     *   3. REPORTING_MANAGER can only approve requests from their direct reports
+     *      (employees where emp.manager == this user).
+     *
+     * For development/testing with a single super admin account:
+     * Create a second super admin user to approve the first one's requests.
      */
     private static boolean canActOn(User reviewer, RegularizationRequest e) {
-        if (e.getEmployee().getUser() != null
-                && e.getEmployee().getUser().getId().equals(reviewer.getId())) {
+        // Rule 1: Self-approval is never allowed — check identity first
+        boolean isSelf = e.getEmployee().getUser() != null
+                && e.getEmployee().getUser().getId().equals(reviewer.getId());
+        if (isSelf) {
             return false;
         }
-        if (isManagementRole(reviewer)) return true;
+
+        // Rule 2: SUPER_ADMIN and ADMIN can act on anyone else's request
+        if (isManagementRole(reviewer)) {
+            return true;
+        }
+
+        // Rule 3: REPORTING_MANAGER can only act on their direct reports
         User manager = e.getEmployee().getManager();
         return manager != null && manager.getId().equals(reviewer.getId());
     }
 
-    /** Throws if reviewer cannot act on this request. */
+    /** Throws with a descriptive message if reviewer cannot act on this request. */
     private void requireCanActOn(User reviewer, RegularizationRequest e) {
+        // Check self first to give a specific message
+        boolean isSelf = e.getEmployee().getUser() != null
+                && e.getEmployee().getUser().getId().equals(reviewer.getId());
+        if (isSelf) {
+            throw new IllegalStateException(
+                    "Self-approval is not permitted. " +
+                    "A different admin or manager must approve your own requests.");
+        }
         if (!canActOn(reviewer, e)) {
             throw new IllegalStateException(
-                    "You are not authorized to act on this regularization request");
+                    "You are not authorized to act on this regularization request. " +
+                    "Only the employee's reporting manager or an admin can approve it.");
         }
     }
 
@@ -280,9 +304,18 @@ public class RegularizationService {
                 PageRequest.of(page, clamped,
                         Sort.by(Sort.Direction.ASC, "submittedAt"));
 
-        Page<RegularizationRequest> result =
-                requestRepository.findByEmployeeManagerAndStatusOrderBySubmittedAtAsc(
-                        manager, RegularizationStatus.PENDING, pg);
+        // SUPER_ADMIN and ADMIN see ALL pending requests across the organisation
+        // so they can act on any request (except their own).
+        // REPORTING_MANAGER sees only their direct reports' pending requests.
+        Page<RegularizationRequest> result;
+        if (isManagementRole(manager)) {
+            var spec = RegularizationRequestSpecification.withFilters(
+                    null, null, null, RegularizationStatus.PENDING, null, null);
+            result = requestRepository.findAll(spec, pg);
+        } else {
+            result = requestRepository.findByEmployeeManagerAndStatusOrderBySubmittedAtAsc(
+                    manager, RegularizationStatus.PENDING, pg);
+        }
 
         return toPage(result);
     }
@@ -290,6 +323,9 @@ public class RegularizationService {
     @Transactional(readOnly = true)
     public long countPendingForManager() {
         User manager = resolveCurrentUser();
+        if (isManagementRole(manager)) {
+            return requestRepository.countByStatus(RegularizationStatus.PENDING);
+        }
         return requestRepository.countByEmployeeManagerAndStatus(
                 manager, RegularizationStatus.PENDING);
     }

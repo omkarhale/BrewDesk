@@ -92,6 +92,12 @@ public interface RegularizationRequestRepository
             RegularizationStatus status
     );
 
+    /**
+     * Total count of requests by status — used by SUPER_ADMIN / ADMIN
+     * for the organisation-wide pending badge count.
+     */
+    long countByStatus(RegularizationStatus status);
+
     // ── Convenience lookup ────────────────────────────────────────────────────
 
     /**

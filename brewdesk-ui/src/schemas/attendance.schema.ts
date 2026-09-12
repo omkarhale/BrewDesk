@@ -153,9 +153,6 @@ const REGULARIZATION_REASON_MAX = 500
 const REJECTION_REASON_MIN      = 5
 const REJECTION_REASON_MAX      = 500
 
-const isoDateTimeRegex =
-  /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/
-
 const regularizationType = z.enum([
   'MISSED_PUNCH',
   'INCORRECT_PUNCH',
@@ -173,15 +170,15 @@ const reasonField = z
   .min(REGULARIZATION_REASON_MIN, `Reason must be at least ${REGULARIZATION_REASON_MIN} characters`)
   .max(REGULARIZATION_REASON_MAX, `Reason must not exceed ${REGULARIZATION_REASON_MAX} characters`)
 
-const isoDateTime = (label: string) =>
+const timeField = (label: string) =>
   z
     .string()
     .trim()
     .optional()
     .nullable()
     .refine(
-      (v) => v == null || v === '' || isoDateTimeRegex.test(v),
-      `${label} must be a valid ISO date-time (YYYY-MM-DDTHH:MM)`,
+      (v) => v == null || v === '' || timeRegex.test(v),
+      `${label} must be a valid time (HH:MM)`,
     )
 
 export const submitRegularizationSchema = z
@@ -191,8 +188,8 @@ export const submitRegularizationSchema = z
       .min(1, 'Attendance date is required')
       .regex(/^\d{4}-\d{2}-\d{2}$/, 'Attendance date must be in YYYY-MM-DD format'),
     type: regularizationType,
-    requestedPunchIn:  isoDateTime('Punch-in time'),
-    requestedPunchOut: isoDateTime('Punch-out time'),
+    requestedPunchIn:  timeField('Punch-in time'),
+    requestedPunchOut: timeField('Punch-out time'),
     halfDayType: halfDayType.optional().nullable(),
     reason: reasonField,
   })
