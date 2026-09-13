@@ -37,6 +37,7 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(temporaryPassword))
                 .role(request.getRole())
+                .gender(request.getGender() != null ? request.getGender() : com.office.brewdesk.enums.Gender.OTHER)
                 .active(true)
                 .mustChangePassword(true)
                 .build();
@@ -129,6 +130,7 @@ public class UserService {
                         .name(user.getName())
                         .email(user.getEmail())
                         .role(user.getRole().name())
+                        .gender(user.getGender() != null ? user.getGender().name() : null)
                         .active(user.isActive())
                         .mustChangePassword(user.isMustChangePassword())
                         .createdAt(user.getCreatedAt())
@@ -157,6 +159,9 @@ public class UserService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setRole(request.getRole());
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
 
         User savedUser = userRepository.save(user);
 
@@ -165,6 +170,7 @@ public class UserService {
                 .name(savedUser.getName())
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().name())
+                .gender(savedUser.getGender() != null ? savedUser.getGender().name() : null)
                 .active(savedUser.isActive())
                 .mustChangePassword(savedUser.isMustChangePassword())
                 .createdAt(savedUser.getCreatedAt())

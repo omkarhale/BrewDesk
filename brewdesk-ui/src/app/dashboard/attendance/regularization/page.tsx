@@ -1,52 +1,52 @@
 'use client'
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { format } from 'date-fns'
-import {
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Loader2,
-  Plus,
-  X,
-} from 'lucide-react'
+import { calculateAttendance } from '@/api/attendance'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AttachmentDropzone } from '@/features/attendance/components/regularization/AttachmentDropzone'
 import { AttendanceComparisonPanel } from '@/features/attendance/components/regularization/AttendanceComparisonPanel'
 import { RegularizationStatusBadge } from '@/features/attendance/components/regularization/RegularizationStatusBadge'
 import { getRegularizationTypeLabel } from '@/features/attendance/components/regularization/RegularizationTypeBadge'
-import { AttachmentDropzone } from '@/features/attendance/components/regularization/AttachmentDropzone'
 import {
-  useCancelRegularization,
-  useMyRegularizations,
-  useRegularizationDetail,
-  useSubmitRegularization,
+    useCancelRegularization,
+    useMyRegularizations,
+    useRegularizationDetail,
+    useSubmitRegularization,
 } from '@/hooks/useRegularization'
 import { useMyProfile } from '@/hooks/useWebPunch'
-import { calculateAttendance } from '@/api/attendance'
-import {
-  HalfDayType,
-  RegularizationStatus,
-  RegularizationType,
-  RegularizationRequestSummaryResponse,
-} from '@/types/attendance'
-import {
-  submitRegularizationSchema,
-  SubmitRegularizationFormValues,
-} from '@/schemas/attendance.schema'
 import { cn, formatAttendanceDate } from '@/lib/utils'
+import {
+    SubmitRegularizationFormValues,
+    submitRegularizationSchema,
+} from '@/schemas/attendance.schema'
+import {
+    HalfDayType,
+    RegularizationRequestSummaryResponse,
+    RegularizationStatus,
+    RegularizationType,
+} from '@/types/attendance'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { format } from 'date-fns'
+import {
+    AlertCircle,
+    ChevronLeft,
+    ChevronRight,
+    FileText,
+    Loader2,
+    Plus,
+    X,
+} from 'lucide-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -105,6 +105,7 @@ function NewRequestForm({
     useState<import('@/types/attendance').AttendanceCalculationResponse | null>(null)
   const [loadingPreview, setLoadingPreview] = useState(false)
   const [missedPunch, setMissedPunch] = useState<MissedPunchSelector>('BOTH')
+  const [attachments, setAttachments] = useState<File[]>([])
 
   const {
     register,
@@ -151,15 +152,32 @@ function NewRequestForm({
     const isoIn  = punchIn  && type !== 'HALF_DAY' ? `${values.attendanceDate}T${punchIn}:00`  : null
     const isoOut = punchOut && type !== 'HALF_DAY' ? `${values.attendanceDate}T${punchOut}:00` : null
 
-    const result = await submit.mutateAsync({
-      attendanceDate:    values.attendanceDate,
-      type:              values.type,
-      requestedPunchIn:  isoIn,
-      requestedPunchOut: isoOut,
-      halfDayType:       values.halfDayType ?? null,
-      reason:            values.reason,
-    })
-    onSubmitted(result.id)
+    try {
+      const result = await submit.mutateAsync({
+        attendanceDate:    values.attendanceDate,
+        type:              values.type,
+        requestedPunchIn:  isoIn,
+        requestedPunchOut: isoOut,
+        halfDayType:       values.halfDayType ?? null,
+        reason:            values.reason,
+      })
+
+      // Upload attachments if any were added
+      if (attachments.length > 0) {
+        const { uploadAttachment } = await import('@/api/attendance')
+        for (const file of attachments) {
+          try {
+            await uploadAttachment(result.id, file)
+          } catch (err) {
+            console.error(`Failed to upload ${file.name}:`, err)
+          }
+        }
+      }
+
+      onSubmitted(result.id)
+    } catch (error) {
+      // Error toast already handled by mutation
+    }
   }
 
   return (
@@ -354,10 +372,70 @@ function NewRequestForm({
         )}
       </div>
 
+      {/* Attachments */}
+      <div className="space-y-2">
+        <Label>Supporting Documents</Label>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              id="rg-attachments"
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png"
+              className="sr-only"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || [])
+                setAttachments(prev => [...prev, ...files])
+              }}
+            />
+            <Label
+              htmlFor="rg-attachments"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-dashed border-muted-foreground/40 bg-muted/30 px-3 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted/50 cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Files
+            </Label>
+            <span className="text-[11px] text-muted-foreground">
+              PDF, JPEG, PNG • Max 5MB per file
+            </span>
+          </div>
+
+          {/* File list */}
+          {attachments.length > 0 && (
+            <div className="space-y-1">
+              {attachments.map((file, idx) => (
+                <div key={idx} className="flex items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-1.5">
+                  <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-[12px] font-medium text-foreground truncate flex-1">
+                    {file.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {(file.size / 1024 / 1024).toFixed(1)}MB
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachments(prev => prev.filter((_, i) => i !== idx))}
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="flex items-center justify-between pt-1">
-        <p className="text-[11px] text-muted-foreground">
-          Attachments can be added after submission from the request detail.
-        </p>
+        {profile?.managerName ? (
+          <p className="text-[11px] text-muted-foreground">
+            <span className="text-blue-600 dark:text-blue-400 font-medium">{profile.managerName}</span> will review this request
+          </p>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">
+            Your reporting manager will review this request
+          </p>
+        )}
         <div className="flex gap-2 justify-end">
           <Button
             type="button"
@@ -375,10 +453,17 @@ function NewRequestForm({
             {submit.isPending ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Submitting…
+                {attachments.length > 0 ? 'Submitting & Uploading…' : 'Submitting…'}
               </>
             ) : (
-              'Submit Request'
+              <>
+                Submit Request
+                {attachments.length > 0 && (
+                  <span className="ml-1 text-[11px] text-blue-200">
+                    +{attachments.length} file{attachments.length !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </>
             )}
           </Button>
         </div>

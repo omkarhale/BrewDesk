@@ -12,6 +12,8 @@ import com.office.brewdesk.attendance.repository.ShiftRepository;
 import com.office.brewdesk.entity.User;
 import com.office.brewdesk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +71,22 @@ public class EmployeeProfileService {
         return employeeProfileRepository.findAll().stream().map(this::mapToResponse).toList();
     }
 
+    /**
+     * Returns only the employees whose manager field points to the
+     * currently authenticated user. Used by the Reporting Manager role
+     * to scope their team view — they cannot see other employees.
+     */
+    @Transactional(readOnly = true)
+    public List<EmployeeResponse> getMyTeam() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found"));
+        return employeeProfileRepository.findByManager(currentUser)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     public EmployeeResponse getEmployee(Long id) {
         return mapToResponse(findById(id));
@@ -119,11 +137,7 @@ public class EmployeeProfileService {
         return EmployeeResponse.builder()
                 .id(employee.getId())
                 .userId(employee.getUser().getId())
-                .userName(
-                        employee.getUser() != null
-                                ? employee.getUser().getName()
-                                : null
-                )
+                .userName(employee.getUser() != null ? employee.getUser().getName() : null)
                 .employeeCode(employee.getEmployeeCode())
                 .departmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null)
                 .departmentName(employee.getDepartment() != null ? employee.getDepartment().getName() : null)
@@ -131,6 +145,7 @@ public class EmployeeProfileService {
                 .shiftName(employee.getShift() != null ? employee.getShift().getName() : null)
                 .designation(employee.getDesignation())
                 .managerId(employee.getManager() != null ? employee.getManager().getId() : null)
+                .managerName(employee.getManager() != null ? employee.getManager().getName() : null)
                 .joiningDate(employee.getJoiningDate())
                 .active(employee.getActive())
                 .createdAt(employee.getCreatedAt())

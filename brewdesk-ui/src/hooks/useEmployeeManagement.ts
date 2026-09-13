@@ -1,17 +1,19 @@
 ﻿"use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import {
-  createEmployee,
-  getEmployees,
-  updateEmployee,
-  updateEmployeeShift,
+    createEmployee,
+    getEmployees,
+    getMyTeam,
+    updateEmployee,
+    updateEmployeeShift,
 } from "@/api/attendance";
 import { CreateEmployeeRequest, UpdateEmployeeRequest } from "@/types/attendance";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const employeeKeys = {
-  all: ["attendance", "employees"] as const,
+  all:    ["attendance", "employees"]         as const,
+  myTeam: ["attendance", "employees", "team"] as const,
 };
 
 function apiMsg(error: unknown, fallback: string): string {
@@ -22,8 +24,14 @@ function apiMsg(error: unknown, fallback: string): string {
   return fallback;
 }
 
+/** All employees — ADMIN / SUPER_ADMIN only */
 export function useEmployeesQuery() {
   return useQuery({ queryKey: employeeKeys.all, queryFn: getEmployees });
+}
+
+/** Only the employees who report to the authenticated user — REPORTING_MANAGER */
+export function useMyTeamQuery() {
+  return useQuery({ queryKey: employeeKeys.myTeam, queryFn: getMyTeam });
 }
 
 export function useCreateEmployee() {
@@ -32,6 +40,7 @@ export function useCreateEmployee() {
     mutationFn: (request: CreateEmployeeRequest) => createEmployee(request),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: employeeKeys.all });
+      qc.invalidateQueries({ queryKey: employeeKeys.myTeam });
       toast.success("Employee created successfully");
     },
     onError: (err: unknown) =>
@@ -46,6 +55,7 @@ export function useUpdateEmployee() {
       updateEmployee(id, request),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: employeeKeys.all });
+      qc.invalidateQueries({ queryKey: employeeKeys.myTeam });
       toast.success("Employee updated successfully");
     },
     onError: (err: unknown) =>
@@ -60,6 +70,7 @@ export function useUpdateEmployeeShift() {
       updateEmployeeShift(employeeId, shiftId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: employeeKeys.all });
+      qc.invalidateQueries({ queryKey: employeeKeys.myTeam });
       toast.success("Employee shift updated");
     },
     onError: (err: unknown) =>

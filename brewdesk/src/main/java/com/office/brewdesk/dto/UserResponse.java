@@ -1,6 +1,5 @@
 package com.office.brewdesk.dto;
 
-import com.office.brewdesk.enums.Role;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,6 +13,7 @@ public class UserResponse {
     private String name;
     private String email;
     private String role;
+    private String gender;
     private boolean active;
     private boolean mustChangePassword;
     private LocalDateTime createdAt;

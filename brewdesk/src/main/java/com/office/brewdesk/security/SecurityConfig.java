@@ -77,6 +77,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**")
                         .hasAnyRole(MANAGEMENT)
 
+                        // ── Leave module ─────────────────────────────────────
+                        .requestMatchers("/api/leave/**").hasAnyRole(ALL_STAFF)
+                        .requestMatchers("/api/admin/leave/**").hasAnyRole(MANAGEMENT)
+
                         // ── Attendance records & management ──────────────────
                         // Admins: full access
                         // Managers: read own team (service layer enforces scope)

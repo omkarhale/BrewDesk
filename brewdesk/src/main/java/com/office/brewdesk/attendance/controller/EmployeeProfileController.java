@@ -29,9 +29,20 @@ public class EmployeeProfileController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','REPORTING_MANAGER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
         return ResponseEntity.ok(employeeProfileService.getAllEmployees());
+    }
+
+    /**
+     * Returns only the employees who report to the authenticated user.
+     * Used by Reporting Managers to see their own team — they cannot
+     * call /employees (all) because that is restricted to ADMIN/SUPER_ADMIN.
+     */
+    @GetMapping("/my-team")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','REPORTING_MANAGER')")
+    public ResponseEntity<List<EmployeeResponse>> getMyTeam() {
+        return ResponseEntity.ok(employeeProfileService.getMyTeam());
     }
 
     @GetMapping("/{id}")

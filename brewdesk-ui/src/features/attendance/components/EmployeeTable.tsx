@@ -1,14 +1,14 @@
 ﻿"use client";
-import { useState } from "react";
-import { Pencil, Power, UserCircle2 } from "lucide-react";
-import { Department, Employee, Shift } from "@/types/attendance";
-import { UserResponse } from "@/types/user";
-import { cn, formatAttendanceDate } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
-import { EditEmployeeDialog } from "./EditEmployeeDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUpdateEmployee } from "@/hooks/useEmployeeManagement";
+import { cn, formatAttendanceDate } from "@/lib/utils";
+import { Department, Employee, Shift } from "@/types/attendance";
+import { UserResponse } from "@/types/user";
+import { Pencil, Power, UserCircle2 } from "lucide-react";
+import { useState } from "react";
+import { EditEmployeeDialog } from "./EditEmployeeDialog";
 
 interface Props {
   employees: Employee[] | undefined;
@@ -118,7 +118,15 @@ export function EmployeeTable({ employees, isLoading, error, onRetry, onAddEmplo
         </table>
       </div>
       {editTarget && (
-        <EditEmployeeDialog open={!!editTarget} onOpenChange={(v) => !v && setEditTarget(null)} employee={editTarget} shifts={shifts} departments={departments} onSuccess={() => { setEditTarget(null); onRefetch(); }} />
+        <EditEmployeeDialog
+          open={!!editTarget}
+          onOpenChange={(v) => !v && setEditTarget(null)}
+          employee={editTarget}
+          shifts={shifts}
+          departments={departments}
+          users={users}
+          onSuccess={() => { setEditTarget(null); onRefetch(); }}
+        />
       )}
     </>
   );

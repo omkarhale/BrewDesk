@@ -145,6 +145,11 @@ export default function MyAttendancePage() {
           <p className="mt-0.5 text-[13px] text-muted-foreground">
             Track your check-ins, view history, and see monthly attendance at a glance.
           </p>
+          {profile?.managerName && (
+            <p className="mt-1.5 text-[12px] text-blue-600 dark:text-blue-400">
+              <span className="text-muted-foreground">Reports to:</span> {profile.managerName}
+            </p>
+          )}
         </div>
         <Button
           variant="outline"

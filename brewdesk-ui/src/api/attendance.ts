@@ -1,29 +1,29 @@
 ﻿import apiClient from "@/lib/api";
 import {
-  AttendanceCalculationResponse,
-  AttendanceEventPage,
-  AttendanceRecordsPage,
-  AttendanceRecordsParams,
-  BulkCalculationRequest,
-  BulkCalculationResponse,
-  CreateDepartmentRequest,
-  CreateEmployeeRequest,
-  CreateShiftRequest,
-  Department,
-  Employee,
-  RegularizationAttachmentResponse,
-  RegularizationRequestPage,
-  RegularizationRequestResponse,
-  RegularizationStatus,
-  RegularizationType,
-  RejectRegularizationRequest,
-  Shift,
-  SimulatePunchRequest,
-  SubmitRegularizationRequest,
-  UpdateDepartmentRequest,
-  UpdateEmployeeRequest,
-  UpdateShiftRequest,
-  WebPunchResponse,
+    AttendanceCalculationResponse,
+    AttendanceEventPage,
+    AttendanceRecordsPage,
+    AttendanceRecordsParams,
+    BulkCalculationRequest,
+    BulkCalculationResponse,
+    CreateDepartmentRequest,
+    CreateEmployeeRequest,
+    CreateShiftRequest,
+    Department,
+    Employee,
+    RegularizationAttachmentResponse,
+    RegularizationRequestPage,
+    RegularizationRequestResponse,
+    RegularizationStatus,
+    RegularizationType,
+    RejectRegularizationRequest,
+    Shift,
+    SimulatePunchRequest,
+    SubmitRegularizationRequest,
+    UpdateDepartmentRequest,
+    UpdateEmployeeRequest,
+    UpdateShiftRequest,
+    WebPunchResponse,
 } from "@/types/attendance";
 
 // ── Attendance Calculation ────────────────────────────────────────────────────
@@ -165,6 +165,12 @@ export async function deleteShift(id: number): Promise<void> {
 
 export async function getEmployees(): Promise<Employee[]> {
   const res = await apiClient.get<Employee[]>("/api/attendance/employees");
+  return res.data;
+}
+
+/** Returns only the employees who report to the authenticated user (manager view). */
+export async function getMyTeam(): Promise<Employee[]> {
+  const res = await apiClient.get<Employee[]>("/api/attendance/employees/my-team");
   return res.data;
 }
 

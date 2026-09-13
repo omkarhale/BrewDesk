@@ -2,33 +2,35 @@
 
 import { LogoutConfirmDialog } from '@/components/auth/LogoutConfirmDialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { cn, getInitials } from '@/lib/utils'
 import { Role } from '@/types/auth'
 import {
-  Activity,
-  Building2,
-  CalendarDays,
-  CheckSquare,
-  ChevronDown,
-  ClipboardCheck,
-  ClipboardList,
-  Clock,
-  Coffee,
-  FileEdit,
-  Fingerprint,
-  Layers,
-  LayoutDashboard,
-  LogOut,
-  ScrollText,
-  Shield,
-  TerminalSquare,
-  User,
-  UserCircle2,
-  Users,
-  UtensilsCrossed,
-  X,
+    Activity,
+    Building2,
+    CalendarDays,
+    CheckSquare,
+    ChevronDown,
+    ClipboardCheck,
+    ClipboardList,
+    Clock,
+    Coffee,
+    FileEdit,
+    Fingerprint,
+    Layers,
+    LayoutDashboard,
+    LogOut,
+    ScrollText,
+    Settings,
+    Shield,
+    TerminalSquare,
+    TrendingUp,
+    Umbrella,
+    User,
+    UserCircle2,
+    Users,
+    UtensilsCrossed,
+    X
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -134,6 +136,16 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard/admin', icon: LayoutDashboard },
     { kind: 'leaf', label: 'Users',     href: '/admin/users',      icon: Users },
     adminAttendanceGroup,
+    {
+      kind: 'group', id: 'leave', label: 'Leave', icon: Umbrella,
+      children: [
+        { kind: 'leaf', label: 'My Leave',       href: '/dashboard/leave',                  icon: CalendarDays },
+        { kind: 'leaf', label: 'Leave Types',    href: '/dashboard/leave/admin/types',       icon: Settings },
+        { kind: 'leaf', label: 'Leave Policies', href: '/dashboard/leave/admin/policies',    icon: ClipboardCheck },
+        { kind: 'leaf', label: 'Accrual',        href: '/dashboard/leave/admin/accrual',     icon: TrendingUp },
+        { kind: 'leaf', label: 'Approvals',      href: '/dashboard/leave/approvals',         icon: CheckSquare },
+      ],
+    },
     adminPantryGroup,
     profileLeaf,
   ],
@@ -141,24 +153,45 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard/admin', icon: LayoutDashboard },
     { kind: 'leaf', label: 'Users',     href: '/admin/users',      icon: Users },
     adminAttendanceGroup,
+    {
+      kind: 'group', id: 'leave', label: 'Leave', icon: Umbrella,
+      children: [
+        { kind: 'leaf', label: 'My Leave',       href: '/dashboard/leave',                  icon: CalendarDays },
+        { kind: 'leaf', label: 'Leave Types',    href: '/dashboard/leave/admin/types',       icon: Settings },
+        { kind: 'leaf', label: 'Leave Policies', href: '/dashboard/leave/admin/policies',    icon: ClipboardCheck },
+        { kind: 'leaf', label: 'Accrual',        href: '/dashboard/leave/admin/accrual',     icon: TrendingUp },
+        { kind: 'leaf', label: 'Approvals',      href: '/dashboard/leave/approvals',         icon: CheckSquare },
+      ],
+    },
     adminPantryGroup,
     profileLeaf,
   ],
   REPORTING_MANAGER: [
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard/manager', icon: LayoutDashboard },
     managerAttendanceGroup,
+    {
+      kind: 'group', id: 'leave', label: 'Leave', icon: Umbrella,
+      children: [
+        { kind: 'leaf', label: 'My Leave',  href: '/dashboard/leave',           icon: CalendarDays },
+        { kind: 'leaf', label: 'Approvals', href: '/dashboard/leave/approvals',  icon: CheckSquare },
+      ],
+    },
     employeePantryGroup,
     profileLeaf,
   ],
   CHEF: [
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard/chef', icon: LayoutDashboard },
     staffAttendanceGroup,
+    { kind: 'group', id: 'leave', label: 'Leave', icon: Umbrella,
+      children: [{ kind: 'leaf', label: 'My Leave', href: '/dashboard/leave', icon: CalendarDays }] },
     chefPantryGroup,
     profileLeaf,
   ],
   EMPLOYEE: [
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     staffAttendanceGroup,
+    { kind: 'group', id: 'leave', label: 'Leave', icon: Umbrella,
+      children: [{ kind: 'leaf', label: 'My Leave', href: '/dashboard/leave', icon: CalendarDays }] },
     employeePantryGroup,
     profileLeaf,
   ],

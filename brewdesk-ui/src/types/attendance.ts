@@ -166,6 +166,7 @@ export interface Employee {
   shiftName: string | null;
   designation: string | null;
   managerId: number | null;
+  managerName: string | null;
   joiningDate: string;
   active: boolean;
   createdAt?: string;

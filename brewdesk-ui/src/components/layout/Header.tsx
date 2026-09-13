@@ -13,7 +13,7 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { cn, getInitials } from '@/lib/utils'
 import { Bell, ChevronRight, Menu, Monitor, Moon, Sun } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/context/ThemeContext'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 

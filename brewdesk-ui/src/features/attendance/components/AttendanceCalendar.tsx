@@ -225,22 +225,22 @@ export function AttendanceCalendar({
 
         {/* ── Grid ── */}
         {isLoading ? (
-          <div className="grid grid-cols-7 gap-0.5">
+          <div className="grid grid-cols-7 gap-px bg-border/30 p-px rounded-lg">
             {Array.from({ length: 35 }).map((_, i) => (
               <div
                 key={i}
-                className="h-[68px] rounded-md bg-muted animate-pulse"
+                className="h-[68px] rounded-sm bg-card animate-pulse"
               />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-0.5">
+          <div className="grid grid-cols-7 gap-px bg-border/30 p-px rounded-lg overflow-hidden">
             {grid.map((date, idx) => {
               if (!date) {
                 return (
                   <div
                     key={`pad-${idx}`}
-                    className="h-[68px] rounded-md bg-transparent"
+                    className="h-[68px] bg-muted/20"
                   />
                 )
               }
@@ -262,33 +262,40 @@ export function AttendanceCalendar({
                       onClick={() => clickable && onDateClick?.(iso, record)}
                       disabled={future || !onDateClick}
                       className={cn(
-                        'relative flex flex-col items-start p-1.5 h-[68px] w-full rounded-md text-left',
-                        'transition-colors duration-100',
+                        'relative flex flex-col items-start p-1.5 h-[68px] w-full text-left bg-card',
+                        'transition-all duration-150 hover:brightness-95 dark:hover:brightness-110',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:z-10',
+                        'border border-border/20',
 
-                        // Base background
-                        cfg?.cellBg || (wknd ? 'bg-slate-50 dark:bg-slate-900/20' : 'bg-white dark:bg-card/50'),
+                        // Base background with subtle grid effect
+                        cfg?.cellBg || (wknd ? 'bg-slate-50/70 dark:bg-slate-900/30' : 'bg-white dark:bg-card'),
 
                         // Selected ring
                         sel && !today_ && 'ring-2 ring-teal-400 ring-inset z-10',
 
-                        // Today ring
-                        today_ && 'ring-2 ring-teal-600 ring-inset z-10',
+                        // Today ring with enhanced visibility
+                        today_ && 'ring-2 ring-teal-600 ring-inset z-10 shadow-sm',
 
-                        // Hover
-                        clickable && !future && 'hover:brightness-[0.97] dark:hover:brightness-[1.08] cursor-pointer',
+                        // Hover effects
+                        clickable && !future && 'hover:shadow-sm hover:scale-[1.02] cursor-pointer',
 
                         // Future fade
-                        future && 'opacity-30 cursor-default',
+                        future && 'opacity-40 cursor-not-allowed',
+
+                        // Weekend styling
+                        wknd && 'bg-blue-50/50 dark:bg-blue-900/10',
                       )}
                     >
+                      {/* Grid cell border accent */}
+                      <div className="absolute inset-0 border border-border/10 rounded-sm pointer-events-none" />
+
                       {/* Date number */}
                       <span className={cn(
-                        'inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold leading-none',
+                        'inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold leading-none z-10',
                         today_
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-teal-600 text-white shadow-sm'
                           : wknd
-                          ? 'text-blue-400 dark:text-blue-500'
+                          ? 'text-blue-500 dark:text-blue-400'
                           : 'text-foreground',
                       )}>
                         {date.getDate()}
@@ -296,62 +303,73 @@ export function AttendanceCalendar({
 
                       {/* Status code */}
                       {cfg && (
-                        <span className={cn('mt-1 text-[12px] font-bold leading-none', cfg.codeClass)}>
+                        <span className={cn('mt-1 text-[12px] font-bold leading-none z-10', cfg.codeClass)}>
                           {cfg.code}
                         </span>
                       )}
 
                       {/* Weekend label (no record) */}
                       {wknd && !cfg && (
-                        <span className="absolute bottom-1 right-1.5 text-[9px] font-semibold text-slate-300 dark:text-slate-600">
+                        <span className="absolute bottom-1 right-1.5 text-[9px] font-semibold text-slate-400 dark:text-slate-600 z-10">
                           WO
                         </span>
                       )}
 
                       {/* Shift code pill */}
                       {shiftCode && !future && (
-                        <span className="absolute bottom-1 right-1.5 text-[9px] font-medium text-muted-foreground/40">
+                        <span className="absolute bottom-1 right-1.5 text-[9px] font-medium text-muted-foreground/40 z-10">
                           {shiftCode}
                         </span>
                       )}
 
-                      {/* Status dot — bottom-left indicator bar */}
+                      {/* Status dot — enhanced with grid awareness */}
                       {cfg && (
                         <span className={cn(
-                          'absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-t-full',
+                          'absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-6 rounded-t-full z-10',
                           cfg.dotClass,
                         )} />
                       )}
+
+                      {/* Subtle grid highlight on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-sm" />
                     </button>
                   </TooltipTrigger>
 
-                  {/* Tooltip */}
+                  {/* Enhanced Tooltip */}
                   {record && cfg && !future && (
-                    <TooltipContent side="top" className="space-y-1 max-w-[200px] p-3">
-                      <p className={cn('text-[12px] font-semibold', cfg.codeClass)}>{cfg.label}</p>
+                    <TooltipContent side="top" className="space-y-1 max-w-[220px] p-3 border shadow-lg">
+                      <div className="flex items-center gap-2">
+                        <span className={cn('h-2 w-2 rounded-full', cfg.dotClass)} />
+                        <p className={cn('text-[12px] font-semibold', cfg.codeClass)}>{cfg.label}</p>
+                      </div>
                       {record.firstIn && (
-                        <p className="text-[11px] text-muted-foreground">
-                          In: <span className="font-mono font-medium text-foreground">
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">Check In:</span>
+                          <span className="font-mono font-medium text-foreground">
                             {new Date(record.firstIn).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                           </span>
-                        </p>
+                        </div>
                       )}
                       {record.lastOut && (
-                        <p className="text-[11px] text-muted-foreground">
-                          Out: <span className="font-mono font-medium text-foreground">
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">Check Out:</span>
+                          <span className="font-mono font-medium text-foreground">
                             {new Date(record.lastOut).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                           </span>
-                        </p>
+                        </div>
                       )}
                       {record.totalWorkMinutes > 0 && (
-                        <p className="text-[11px] text-muted-foreground">
-                          Work: <span className="font-medium text-foreground">
+                        <div className="flex justify-between text-[11px] pt-1 border-t border-border">
+                          <span className="text-muted-foreground">Total Work:</span>
+                          <span className="font-semibold text-foreground">
                             {Math.floor(record.totalWorkMinutes / 60)}h {record.totalWorkMinutes % 60}m
                           </span>
-                        </p>
+                        </div>
                       )}
                       {record.lateMinutes > 0 && (
-                        <p className="text-[11px] text-amber-600">Late {record.lateMinutes}m</p>
+                        <div className="text-[11px] text-amber-600 dark:text-amber-400">
+                          ⚠ Late by {record.lateMinutes} minutes
+                        </div>
                       )}
                     </TooltipContent>
                   )}

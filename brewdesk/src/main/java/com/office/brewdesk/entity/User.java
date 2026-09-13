@@ -1,5 +1,6 @@
 package com.office.brewdesk.entity;
 
+import com.office.brewdesk.enums.Gender;
 import com.office.brewdesk.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,10 +45,17 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    /** Gender — source of truth for leave eligibility (e.g. Maternity Leave). */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    @Builder.Default
+    private Gender gender = Gender.OTHER;
+
     @Builder.Default
     private boolean active = true;
 
     private LocalDateTime createdAt;
+
     @Builder.Default
     private boolean mustChangePassword = false;
 

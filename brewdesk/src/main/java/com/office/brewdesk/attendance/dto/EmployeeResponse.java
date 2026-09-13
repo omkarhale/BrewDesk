@@ -25,6 +25,7 @@ public class EmployeeResponse {
     private String designation;
 
     private Long managerId;
+    private String managerName;
 
     private LocalDate joiningDate;
 
