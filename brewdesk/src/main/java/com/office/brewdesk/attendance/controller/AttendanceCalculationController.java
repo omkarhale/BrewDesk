@@ -11,6 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.office.brewdesk.attendance.entity.EmployeeProfile;
+import com.office.brewdesk.attendance.repository.EmployeeProfileRepository;
+import com.office.brewdesk.entity.User;
+import com.office.brewdesk.repository.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,6 +27,8 @@ import java.util.List;
 public class AttendanceCalculationController {
 
     private final AttendanceCalculationService attendanceCalculationService;
+    private final EmployeeProfileRepository employeeProfileRepository;
+    private final UserRepository userRepository;
 
     // -- Single calculation ----------------------------------------------------
 
@@ -63,12 +72,56 @@ public class AttendanceCalculationController {
     // -- Monthly records (calendar view) --------------------------------------
 
     @GetMapping("/records/month")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','REPORTING_MANAGER','CHEF','EMPLOYEE')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<AttendanceRecordResponse>> getMonthRecords(
             @RequestParam String employeeCode,
             @RequestParam int year,
-            @RequestParam int month) {
+            @RequestParam int month,
+            Authentication authentication) {
+        validateEmployeeAccess(employeeCode, authentication);
         return ResponseEntity.ok(
                 attendanceCalculationService.getMonthRecords(employeeCode, year, month));
+    }
+
+    @GetMapping("/records/my-month")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<AttendanceRecordResponse>> getMyMonthRecords(
+            @RequestParam int year,
+            @RequestParam int month,
+            Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        EmployeeProfile profile = employeeProfileRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Employee profile not found"));
+
+        return ResponseEntity.ok(
+                attendanceCalculationService.getMonthRecords(profile.getEmployeeCode(), year, month));
+    }
+
+    private void validateEmployeeAccess(String targetEmployeeCode, Authentication auth) {
+        boolean isPrivileged = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN") || a.getAuthority().equals("ROLE_ADMIN"));
+        if (isPrivileged) {
+            return;
+        }
+
+        String email = auth.getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        EmployeeProfile targetEmployee = employeeProfileRepository.findByEmployeeCode(targetEmployeeCode)
+                .orElseThrow(() -> new IllegalArgumentException("Target employee not found"));
+
+        boolean isSelf = targetEmployee.getUser() != null && targetEmployee.getUser().getId().equals(currentUser.getId());
+        if (isSelf) {
+            return;
+        }
+
+        boolean isManager = targetEmployee.getManager() != null && targetEmployee.getManager().getId().equals(currentUser.getId());
+        if (isManager && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_REPORTING_MANAGER"))) {
+            return;
+        }
+
+        throw new AccessDeniedException("You are not authorized to view attendance records for this employee");
     }
 }

@@ -19,19 +19,28 @@ export const ROUTE_GUARDS: RouteGuard[] = [
   // Super-admin + admin only
   { path: '/dashboard/admin',                     allowedRoles: MANAGEMENT_ROLES },
   { path: '/admin/users',                         allowedRoles: MANAGEMENT_ROLES },
+  { path: '/admin/departments',                   allowedRoles: MANAGEMENT_ROLES },
+  { path: '/admin/shifts',                        allowedRoles: MANAGEMENT_ROLES },
+  { path: '/admin/beverages',                     allowedRoles: MANAGEMENT_ROLES },
   { path: '/dashboard/attendance/simulator',      allowedRoles: MANAGEMENT_ROLES },
   { path: '/dashboard/attendance/departments',    allowedRoles: MANAGEMENT_ROLES },
   { path: '/dashboard/attendance/employees',      allowedRoles: MANAGEMENT_ROLES },
   { path: '/dashboard/attendance/shifts',         allowedRoles: MANAGEMENT_ROLES },
   { path: '/dashboard/attendance/records',        allowedRoles: MANAGEMENT_ROLES },
-  { path: '/dashboard/attendance',                allowedRoles: MANAGEMENT_ROLES, exact: true },
+  { path: '/dashboard/attendance/events',         allowedRoles: MANAGEMENT_ROLES },
+  { path: '/dashboard/attendance/regularization/admin', allowedRoles: MANAGEMENT_ROLES },
+  { path: '/dashboard/leave/admin',               allowedRoles: MANAGEMENT_ROLES },
 
   // Reporting manager + management
   { path: '/dashboard/manager',                   allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'REPORTING_MANAGER'] },
   { path: '/dashboard/attendance/team',           allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'REPORTING_MANAGER'] },
+  { path: '/dashboard/attendance/regularization/approvals', allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'REPORTING_MANAGER'] },
+  { path: '/dashboard/leave/approvals',           allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'REPORTING_MANAGER'] },
+  { path: '/dashboard/leave/team',                allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'REPORTING_MANAGER'] },
 
   // Chef (pantry operator) + management
   { path: '/dashboard/chef',                      allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'CHEF'] },
+  { path: '/dashboard/maker',                     allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'CHEF'] },
   { path: '/dashboard/orders',                    allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'CHEF'] },
   { path: '/dashboard/summary',                   allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'CHEF'] },
   { path: '/dashboard/beverages',                 allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'CHEF'] },

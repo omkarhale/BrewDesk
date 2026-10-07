@@ -84,6 +84,13 @@ public class AttendanceCalculationService {
 
         if (punches.isEmpty()) {
 
+            if (record.getStatus() == AttendanceStatus.ON_LEAVE) {
+                record.setTotalWorkMinutes(0);
+                record.setLateMinutes(0);
+                record.setEarlyExitMinutes(0);
+                return attendanceRecordRepository.save(record);
+            }
+
             record.setStatus(AttendanceStatus.ABSENT);
             record.setTotalWorkMinutes(0);
             record.setLateMinutes(0);

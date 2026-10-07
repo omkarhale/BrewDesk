@@ -16,8 +16,8 @@ const STATUS_CONFIG: Record<
 > = {
   PRESENT:    {
     label: 'Present',
-    pill:  'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400',
-    dot:   'bg-teal-500',
+    pill:  'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
+    dot:   'bg-primary',
   },
   ABSENT:     {
     label: 'Absent',

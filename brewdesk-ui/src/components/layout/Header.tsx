@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,10 +13,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/hooks/useAuth'
 import { cn, getInitials } from '@/lib/utils'
-import { Bell, ChevronRight, Menu, Monitor, Moon, Sun } from 'lucide-react'
+import { Bell, ChevronRight, Menu, Monitor, Moon, Search, Sun } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { CommandMenu } from './CommandMenu'
 
 // ── Route label map ───────────────────────────────────────────────────────────
 
@@ -42,6 +44,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/dashboard/attendance/shifts':        'Shifts',
   '/dashboard/attendance/simulator':     'Simulator',
   '/dashboard/attendance/team':          'Team View',
+  '/dashboard/settings/themes':          'Custom Themes',
   '/admin/users':                        'Users',
 }
 
@@ -60,6 +63,16 @@ function buildCrumbs(pathname: string): Crumb[] {
       ]
     }
   }
+  // Check if this is a settings sub-page
+  if (pathname.startsWith('/dashboard/settings/')) {
+    const leafLabel = ROUTE_LABELS[pathname]
+    if (leafLabel) {
+      return [
+        { label: 'Settings', href: '/dashboard/settings/themes' },
+        { label: leafLabel,  href: pathname },
+      ]
+    }
+  }
   const label = ROUTE_LABELS[pathname]
   return label ? [{ label, href: pathname }] : [{ label: 'BrewDesk', href: '/dashboard' }]
 }
@@ -71,7 +84,7 @@ const ROLE_CHIP: Record<string, string> = {
   ADMIN:             'bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400',
   REPORTING_MANAGER: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
   CHEF:              'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
-  EMPLOYEE:          'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400',
+  EMPLOYEE:          'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -84,7 +97,7 @@ const AVATAR_COLORS: Record<string, string> = {
   ADMIN: 'bg-violet-100 text-violet-700',
   REPORTING_MANAGER: 'bg-blue-100 text-blue-700',
   CHEF: 'bg-amber-100 text-amber-700',
-  EMPLOYEE: 'bg-teal-100 text-teal-700',
+  EMPLOYEE: 'bg-primary/15 text-primary',
 }
 
 interface HeaderProps {
@@ -96,6 +109,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { user } = useAuth()
   const { theme, setTheme } = useTheme()
 
+  const [commandOpen, setCommandOpen] = useState(false)
   const crumbs = buildCrumbs(pathname)
   const roleChip = ROLE_CHIP[user?.role ?? 'EMPLOYEE']
   const avatarColor = AVATAR_COLORS[user?.role ?? 'EMPLOYEE']
@@ -106,46 +120,60 @@ export function Header({ onMenuClick }: HeaderProps) {
                         <Monitor className="h-[15px] w-[15px]" />
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card px-4 lg:px-5">
+    <>
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card px-4 lg:px-5">
 
-      {/* Mobile menu toggle */}
-      <button
-        type="button"
-        onClick={onMenuClick}
-        className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden transition-colors"
-        aria-label="Toggle menu"
-      >
-        <Menu className="h-4 w-4" />
-      </button>
+        {/* Mobile menu toggle */}
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden transition-colors"
+          aria-label="Toggle menu"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
 
-      {/* ── Breadcrumb ── */}
-      <nav aria-label="Breadcrumb" className="flex-1 min-w-0">
-        <ol className="flex items-center gap-1.5">
-          {crumbs.map((crumb, i) => (
-            <li key={crumb.href} className="flex items-center gap-1.5 min-w-0">
-              {i > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />}
-              {i < crumbs.length - 1 ? (
-                <Link
-                  href={crumb.href}
-                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors truncate"
-                >
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span
-                  className="text-[14px] font-semibold text-foreground truncate"
-                  style={{ fontFamily: 'var(--font-display)' }}
-                >
-                  {crumb.label}
-                </span>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
+        {/* ── Breadcrumb ── */}
+        <nav aria-label="Breadcrumb" className="flex-1 min-w-0">
+          <ol className="flex items-center gap-1.5">
+            {crumbs.map((crumb, i) => (
+              <li key={crumb.href} className="flex items-center gap-1.5 min-w-0">
+                {i > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />}
+                {i < crumbs.length - 1 ? (
+                  <Link
+                    href={crumb.href}
+                    className="text-[13px] text-muted-foreground hover:text-foreground transition-colors truncate"
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span
+                    className="text-[14px] font-semibold text-foreground truncate"
+                    style={{ fontFamily: 'var(--font-display)' }}
+                  >
+                    {crumb.label}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-      {/* ── Right actions ── */}
-      <div className="flex items-center gap-0.5 shrink-0">
+        {/* ── Command Palette Quick Trigger ── */}
+        <button
+          type="button"
+          onClick={() => setCommandOpen(true)}
+          className="hidden md:flex items-center gap-2 h-8 px-2.5 rounded-lg border border-border bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground text-xs transition-colors shrink-0"
+        >
+          <Search className="h-3.5 w-3.5 opacity-60" />
+          <span>Quick search...</span>
+          <kbd className="pointer-events-none inline-flex h-4.5 select-none items-center gap-0.5 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-semibold text-muted-foreground">
+            ⌘K
+          </kbd>
+        </button>
+
+        {/* ── Right actions ── */}
+        <div className="flex items-center gap-0.5 shrink-0">
 
         {/* Theme toggle */}
         <DropdownMenu>
@@ -183,7 +211,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         >
           <Bell className="h-[15px] w-[15px]" />
           {/* Unread dot */}
-          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-teal-500" />
+          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
         </button>
 
         {/* Divider */}
@@ -223,12 +251,17 @@ export function Header({ onMenuClick }: HeaderProps) {
             </div>
             <div className="py-1">
               <DropdownMenuItem asChild className="text-[13px]">
-                <a href="/dashboard/profile">Profile settings</a>
+                <Link href="/dashboard/profile">Profile settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="text-[13px]">
+                <Link href="/dashboard/settings/themes">Custom Themes</Link>
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </header>
+    <CommandMenu open={commandOpen} onOpenChange={setCommandOpen} />
+    </>
   )
 }

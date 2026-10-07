@@ -14,9 +14,9 @@ const STATUS_CONFIG: Record<
 > = {
   PRESENT:    {
     code: 'P',  label: 'Present',
-    cellBg:   'bg-teal-50 dark:bg-teal-900/15',
-    codeClass: 'text-teal-700 dark:text-teal-400',
-    dotClass:  'bg-teal-500',
+    cellBg:   'bg-primary/10 dark:bg-primary/15',
+    codeClass: 'text-primary',
+    dotClass:  'bg-primary',
   },
   ABSENT:     {
     code: 'A',  label: 'Absent',
@@ -174,7 +174,7 @@ export function AttendanceCalendar({
             {/* Mini summary pills */}
             <div className="flex items-center justify-center gap-2 mt-1">
               {summary['PRESENT'] && (
-                <span className="text-[11px] text-teal-700 dark:text-teal-400 font-medium">
+                <span className="text-[11px] text-primary font-medium">
                   {summary['PRESENT']}P
                 </span>
               )}
@@ -264,17 +264,17 @@ export function AttendanceCalendar({
                       className={cn(
                         'relative flex flex-col items-start p-1.5 h-[68px] w-full text-left bg-card',
                         'transition-all duration-150 hover:brightness-95 dark:hover:brightness-110',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:z-10',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:z-10',
                         'border border-border/20',
 
                         // Base background with subtle grid effect
                         cfg?.cellBg || (wknd ? 'bg-slate-50/70 dark:bg-slate-900/30' : 'bg-white dark:bg-card'),
 
                         // Selected ring
-                        sel && !today_ && 'ring-2 ring-teal-400 ring-inset z-10',
+                        sel && !today_ && 'ring-2 ring-primary/50 ring-inset z-10',
 
                         // Today ring with enhanced visibility
-                        today_ && 'ring-2 ring-teal-600 ring-inset z-10 shadow-sm',
+                        today_ && 'ring-2 ring-primary ring-inset z-10 shadow-sm',
 
                         // Hover effects
                         clickable && !future && 'hover:shadow-sm hover:scale-[1.02] cursor-pointer',
@@ -293,7 +293,7 @@ export function AttendanceCalendar({
                       <span className={cn(
                         'inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold leading-none z-10',
                         today_
-                          ? 'bg-teal-600 text-white shadow-sm'
+                          ? 'bg-primary text-primary-foreground shadow-sm'
                           : wknd
                           ? 'text-blue-500 dark:text-blue-400'
                           : 'text-foreground',

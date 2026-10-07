@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,7 +41,7 @@ function ToggleActiveButton({ employee, onDone }: { employee: Employee; onDone: 
   return (
     <button type="button" onClick={handle} disabled={mutation.isPending}
       className={cn("h-7 w-7 flex items-center justify-center rounded-md transition-colors",
-        employee.active ? "text-muted-foreground hover:bg-amber-50 hover:text-amber-600" : "text-muted-foreground hover:bg-teal-50 hover:text-teal-700")}
+        employee.active ? "text-muted-foreground hover:bg-amber-50 hover:text-amber-600" : "text-muted-foreground hover:bg-primary/10 hover:text-primary")}
       title={employee.active ? "Deactivate" : "Activate"}>
       <Power className="h-3.5 w-3.5" />
     </button>
@@ -101,14 +101,14 @@ export function EmployeeTable({ employees, isLoading, error, onRetry, onAddEmplo
                 </td>
                 <td className="px-4 py-3 hidden lg:table-cell text-[13px] text-muted-foreground">{formatAttendanceDate(e.joiningDate)}</td>
                 <td className="px-4 py-3">
-                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold", e.active ? "bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", e.active ? "bg-teal-500" : "bg-slate-400")} />
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold", e.active ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")}>
+                    <span className={cn("h-1.5 w-1.5 rounded-full", e.active ? "bg-primary" : "bg-slate-400")} />
                     {e.active ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => setEditTarget(e)} className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-teal-50 hover:text-teal-700 transition-colors" title="Edit"><Pencil className="h-3.5 w-3.5"/></button>
+                    <button type="button" onClick={() => setEditTarget(e)} className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors" title="Edit"><Pencil className="h-3.5 w-3.5"/></button>
                     <ToggleActiveButton employee={e} onDone={onRefetch} />
                   </div>
                 </td>

@@ -41,8 +41,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          {/* Teal spinner — matches new primary */}
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+          {/* Theme reactive spinner */}
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="text-[13px] text-muted-foreground">Loading BrewDesk…</p>
         </div>
       </div>

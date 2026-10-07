@@ -10,3 +10,18 @@ export async function createOrder(data: OrderRequest): Promise<OrderResponse> {
   const response = await apiClient.post<OrderResponse>('/api/orders', data)
   return response.data
 }
+
+export async function getMyOrders(): Promise<OrderResponse[]> {
+  const response = await apiClient.get<OrderResponse[]>('/api/orders/my')
+  return response.data
+}
+
+export async function getAllOrders(roundId?: number): Promise<OrderResponse[]> {
+  const params = roundId ? { roundId } : {}
+  const response = await apiClient.get<OrderResponse[]>('/api/orders', { params })
+  return response.data
+}
+
+export async function cancelOrder(orderId: number): Promise<void> {
+  await apiClient.delete(`/api/orders/${orderId}`)
+}

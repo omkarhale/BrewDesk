@@ -8,17 +8,17 @@ import {
 } from '@/types/user'
 
 export async function getUsers(): Promise<UserResponse[]> {
-  const response = await apiClient.get<UserResponse[]>('/api/admin/users/users')
+  const response = await apiClient.get<UserResponse[]>('/api/admin/users')
   return response.data
 }
 
 export async function createUser(request: CreateUserRequest): Promise<CreateUserResponse> {
-  const response = await apiClient.post<CreateUserResponse>('/api/admin/users/users', request)
+  const response = await apiClient.post<CreateUserResponse>('/api/admin/users', request)
   return response.data
 }
 
 export async function updateUser(id: number, request: UpdateUserRequest): Promise<UserResponse> {
-  const response = await apiClient.put<UserResponse>(`/api/admin/users/users/${id}`, request)
+  const response = await apiClient.put<UserResponse>(`/api/admin/users/${id}`, request)
   return response.data
 }
 

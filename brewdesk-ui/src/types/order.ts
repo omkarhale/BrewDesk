@@ -6,8 +6,13 @@ export interface OrderRequest {
 
 export interface OrderResponse {
   orderId: number
+  employeeId?: number
   employeeName: string
+  beverageId?: number
   beverageName: string
+  beverageIcon?: string
+  roundId?: number
   roundName: string
-  createdAt: string   // ISO datetime string "2025-07-14T16:05:00"
+  roundStatus?: string
+  createdAt: string   // ISO datetime string
 }

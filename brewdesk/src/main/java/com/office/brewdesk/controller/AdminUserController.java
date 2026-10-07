@@ -19,20 +19,32 @@ public class AdminUserController {
 
     private final UserService userService;
 
-    @PostMapping("/users")
+    @PostMapping({"", "/users"})
     @ResponseStatus(HttpStatus.CREATED)
     public CreateUserResponse createUser(
             @Valid @RequestBody CreateUserRequest request) {
 
         return userService.createUser(request);
     }
-    @GetMapping("/users")
+
+    @GetMapping({"", "/users"})
     public List<UserResponse> getAllUsers() {
 
         return userService.getAllUsers();
     }
 
-    @PutMapping("/users/{id}")
+    @GetMapping("/metrics")
+    public java.util.Map<String, Object> getMetrics() {
+        List<UserResponse> users = userService.getAllUsers();
+        long totalUsers = users.size();
+        long activeUsers = users.stream().filter(UserResponse::isActive).count();
+        return java.util.Map.of(
+                "totalUsers", totalUsers,
+                "activeUsers", activeUsers
+        );
+    }
+
+    @PutMapping({"/{id}", "/users/{id}"})
     public UserResponse updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {

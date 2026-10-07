@@ -26,14 +26,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -248,6 +240,16 @@ export default function AdminUsersPage() {
     }
   };
 
+  const openCreate = () => {
+    form.reset({
+      name: "",
+      email: "",
+      role: "EMPLOYEE",
+      gender: "OTHER",
+    });
+    setCreateOpen(true);
+  };
+
   const openEdit = (u: UserResponse) => {
     setEditTarget(u);
     form.reset({
@@ -345,7 +347,7 @@ export default function AdminUsersPage() {
             Manage BrewDesk users, roles and account access.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
+        <Button onClick={openCreate}>
           <Plus className="h-4 w-4" />
           Add User
         </Button>
@@ -442,7 +444,7 @@ export default function AdminUsersPage() {
                 : "Create the first BrewDesk user."}
             </p>
             {!hasFilters && (
-              <Button onClick={() => setCreateOpen(true)}>
+              <Button onClick={openCreate}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add User
               </Button>
@@ -575,34 +577,41 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      {/* Create Sheet */}
-      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-        <SheetContent side="right" className="overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Create user</SheetTitle>
-            <SheetDescription>
-              Add a new user. A temporary password will be generated.
-            </SheetDescription>
-          </SheetHeader>
+      {/* Create User Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+                <UserPlus className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold">Create user</DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground mt-0.5">
+                  Add a new user. A temporary password will be generated.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
           <form
             onSubmit={form.handleSubmit(handleCreate)}
-            className="space-y-4 mt-6"
+            className="space-y-4 pt-2"
           >
             <div className="space-y-2">
-              <Label htmlFor="c-name">Name</Label>
+              <Label htmlFor="c-name" className="text-sm font-medium">Name</Label>
               <Input
                 id="c-name"
                 {...form.register("name")}
                 placeholder="Full name"
               />
               {form.formState.errors.name && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {form.formState.errors.name.message}
                 </p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="c-email">Email</Label>
+              <Label htmlFor="c-email" className="text-sm font-medium">Email</Label>
               <Input
                 id="c-email"
                 type="email"
@@ -610,14 +619,16 @@ export default function AdminUsersPage() {
                 placeholder="work@company.com"
               />
               {form.formState.errors.email && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {form.formState.errors.email.message}
                 </p>
               )}
             </div>
-            <RoleSelect id="c-role" />
-            <GenderSelect id="c-gender" />
-            <SheetFooter className="mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <RoleSelect id="c-role" />
+              <GenderSelect id="c-gender" />
+            </div>
+            <DialogFooter className="pt-4 flex flex-row justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -628,43 +639,54 @@ export default function AdminUsersPage() {
               <Button type="submit" disabled={createUser.isPending}>
                 {createUser.isPending ? "Creating…" : "Create user"}
               </Button>
-            </SheetFooter>
+            </DialogFooter>
           </form>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
-      {/* Edit Sheet */}
-      <Sheet open={editOpen} onOpenChange={setEditOpen}>
-        <SheetContent side="right" className="overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Edit user</SheetTitle>
-            <SheetDescription>Update user info and role.</SheetDescription>
-          </SheetHeader>
+      {/* Edit User Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+                <Shield className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold">Edit user</DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground mt-0.5">
+                  Update user info and role.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
           <form
             onSubmit={form.handleSubmit(handleUpdate)}
-            className="space-y-4 mt-6"
+            className="space-y-4 pt-2"
           >
             <div className="space-y-2">
-              <Label htmlFor="e-name">Name</Label>
+              <Label htmlFor="e-name" className="text-sm font-medium">Name</Label>
               <Input id="e-name" {...form.register("name")} />
               {form.formState.errors.name && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {form.formState.errors.name.message}
                 </p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="e-email">Email</Label>
+              <Label htmlFor="e-email" className="text-sm font-medium">Email</Label>
               <Input id="e-email" type="email" {...form.register("email")} />
               {form.formState.errors.email && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive">
                   {form.formState.errors.email.message}
                 </p>
               )}
             </div>
-            <RoleSelect id="e-role" />
-            <GenderSelect id="e-gender" />
-            <SheetFooter className="mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <RoleSelect id="e-role" />
+              <GenderSelect id="e-gender" />
+            </div>
+            <DialogFooter className="pt-4 flex flex-row justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -675,10 +697,10 @@ export default function AdminUsersPage() {
               <Button type="submit" disabled={updateUser.isPending}>
                 {updateUser.isPending ? "Saving…" : "Save changes"}
               </Button>
-            </SheetFooter>
+            </DialogFooter>
           </form>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Disable */}
       <Dialog open={disableOpen} onOpenChange={setDisableOpen}>

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { LogoutConfirmDialog } from '@/components/auth/LogoutConfirmDialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -20,6 +20,7 @@ import {
     Layers,
     LayoutDashboard,
     LogOut,
+    Palette,
     ScrollText,
     Settings,
     Shield,
@@ -59,6 +60,13 @@ type NavItem = NavLeaf | NavGroup
 
 const profileLeaf: NavLeaf = {
   kind: 'leaf', label: 'Profile', href: '/dashboard/profile', icon: User,
+}
+
+const settingsGroup: NavGroup = {
+  kind: 'group', id: 'settings', label: 'Settings', icon: Settings,
+  children: [
+    { kind: 'leaf', label: 'Custom Themes', href: '/dashboard/settings/themes', icon: Palette },
+  ],
 }
 
 // â”€â”€ Attendance groups â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -148,6 +156,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     },
     adminPantryGroup,
     profileLeaf,
+    settingsGroup,
   ],
   ADMIN: [
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard/admin', icon: LayoutDashboard },
@@ -165,6 +174,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     },
     adminPantryGroup,
     profileLeaf,
+    settingsGroup,
   ],
   REPORTING_MANAGER: [
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard/manager', icon: LayoutDashboard },
@@ -178,6 +188,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     },
     employeePantryGroup,
     profileLeaf,
+    settingsGroup,
   ],
   CHEF: [
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard/chef', icon: LayoutDashboard },
@@ -186,6 +197,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
       children: [{ kind: 'leaf', label: 'My Leave', href: '/dashboard/leave', icon: CalendarDays }] },
     chefPantryGroup,
     profileLeaf,
+    settingsGroup,
   ],
   EMPLOYEE: [
     { kind: 'leaf', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -194,6 +206,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
       children: [{ kind: 'leaf', label: 'My Leave', href: '/dashboard/leave', icon: CalendarDays }] },
     employeePantryGroup,
     profileLeaf,
+    settingsGroup,
   ],
 }
 
@@ -204,7 +217,7 @@ const ROLE_META: Record<Role, { label: string; chipClass: string; avatarClass: s
   ADMIN:             { label: 'Admin',       chipClass: 'bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400', avatarClass: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300' },
   REPORTING_MANAGER: { label: 'Manager',     chipClass: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',         avatarClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
   CHEF:              { label: 'Chef',        chipClass: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',     avatarClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  EMPLOYEE:          { label: 'Employee',    chipClass: 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400',         avatarClass: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300' },
+  EMPLOYEE:          { label: 'Employee',    chipClass: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',         avatarClass: 'bg-primary/15 text-primary dark:bg-primary/30 dark:text-primary' },
 }
 
 // â”€â”€ Active path helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -247,23 +260,23 @@ function LeafLink({
         'group flex items-center gap-2.5 rounded-md py-1.5 text-[13px] font-medium transition-all duration-100',
         indent ? 'pl-8 pr-3' : 'px-3',
         active
-          ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400'
+          ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary font-semibold'
           : 'text-[hsl(220_15%_40%)] hover:bg-[hsl(220_20%_96%)] hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-foreground',
       )}
     >
       <Icon className={cn(
         'h-[15px] w-[15px] shrink-0 transition-colors',
-        active ? 'text-teal-600 dark:text-teal-400' : 'text-muted-foreground/70 group-hover:text-foreground',
+        active ? 'text-primary' : 'text-muted-foreground/70 group-hover:text-foreground',
       )} />
       <span className="flex-1 truncate leading-5">{item.label}</span>
       {active && (
-        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-500 shrink-0" />
+        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
       )}
     </Link>
   )
 }
 
-// â”€â”€ GroupSection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── GroupSection ────────────────────────────────────────────────────────────
 
 function GroupSection({
   group, pathname, open, onToggle, onClose,
@@ -279,19 +292,19 @@ function GroupSection({
         className={cn(
           'group flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-all duration-100',
           active
-            ? 'text-teal-700 dark:text-teal-400'
+            ? 'text-primary font-semibold'
             : 'text-[hsl(220_15%_40%)] hover:bg-[hsl(220_20%_96%)] hover:text-foreground dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-foreground',
         )}
       >
         <Icon className={cn(
           'h-[15px] w-[15px] shrink-0',
-          active ? 'text-teal-600 dark:text-teal-400' : 'text-muted-foreground/70 group-hover:text-foreground',
+          active ? 'text-primary' : 'text-muted-foreground/70 group-hover:text-foreground',
         )} />
         <span className="flex-1 truncate text-left leading-5">{group.label}</span>
         <ChevronDown className={cn(
           'h-3 w-3 shrink-0 transition-transform duration-200',
           open ? 'rotate-180' : '',
-          active ? 'text-teal-500' : 'text-muted-foreground/50',
+          active ? 'text-primary' : 'text-muted-foreground/50',
         )} />
       </button>
 
@@ -365,7 +378,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* â”€â”€ Logo â”€â”€ */}
       <div className="flex items-center justify-between px-4 h-14 border-b border-[hsl(var(--sidebar-border))]">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white shadow-sm">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
             <Coffee className="h-3.5 w-3.5" />
           </div>
           <span className="text-[15px] font-semibold tracking-tight text-foreground"

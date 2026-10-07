@@ -17,12 +17,16 @@ import com.office.brewdesk.leave.repository.LeaveApprovalHistoryRepository;
 import com.office.brewdesk.leave.repository.LeaveRequestRepository;
 import com.office.brewdesk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import com.office.brewdesk.attendance.entity.AttendanceRecord;
+import com.office.brewdesk.attendance.enums.AttendanceStatus;
+import com.office.brewdesk.attendance.repository.AttendanceRecordRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,6 +40,7 @@ public class LeaveManagerService {
     private final EmployeeProfileRepository employeeProfileRepo;
     private final UserRepository userRepository;
     private final LeaveRequestService leaveRequestService;
+    private final AttendanceRecordRepository attendanceRecordRepository;
 
     private User currentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -107,6 +112,30 @@ public class LeaveManagerService {
                 .performedBy(manager)
                 .remarks(review != null ? review.getRemarks() : null)
                 .build());
+
+        // Synchronize with attendance records: mark dates in range as ON_LEAVE
+        LocalDate current = req.getStartDate();
+        while (!current.isAfter(req.getEndDate())) {
+            final LocalDate date = current;
+            AttendanceRecord record = attendanceRecordRepository
+                    .findByEmployeeIdAndAttendanceDate(req.getEmployee().getId(), date)
+                    .orElseGet(() -> AttendanceRecord.builder()
+                            .employee(req.getEmployee())
+                            .shift(req.getEmployee().getShift())
+                            .attendanceDate(date)
+                            .build());
+            record.setStatus(AttendanceStatus.ON_LEAVE);
+            record.setTotalWorkMinutes(0);
+            record.setLateMinutes(0);
+            record.setEarlyExitMinutes(0);
+            if (record.getShift() == null && req.getEmployee().getShift() != null) {
+                record.setShift(req.getEmployee().getShift());
+            }
+            if (record.getShift() != null) {
+                attendanceRecordRepository.save(record);
+            }
+            current = current.plusDays(1);
+        }
 
         return leaveRequestService.toResponse(requestRepo.save(req));
     }

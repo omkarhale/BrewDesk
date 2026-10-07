@@ -12,7 +12,7 @@ interface StatCardProps {
   isLoading?: boolean
 }
 
-export function StatCard({ title, value, icon: Icon, description, colorClass = 'text-amber-600', isLoading }: StatCardProps) {
+export function StatCard({ title, value, icon: Icon, description, colorClass = 'text-primary', isLoading }: StatCardProps) {
   if (isLoading) {
     return (
       <Card>

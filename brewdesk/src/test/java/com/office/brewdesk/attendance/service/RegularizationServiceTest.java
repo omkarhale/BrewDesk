@@ -485,4 +485,9 @@ class RegularizationServiceTest {
         when(attachmentRepository.countByRequestIdsGrouped(any()))
                 .thenReturn(List.of());
     }
+
+    private void lenientAttachmentCounts(List<RegularizationRequest> requests) {
+        org.mockito.Mockito.lenient().when(attachmentRepository.countByRequestIdsGrouped(any()))
+                .thenReturn(List.of());
+    }
 }

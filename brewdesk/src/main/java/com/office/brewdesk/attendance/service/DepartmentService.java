@@ -63,7 +63,8 @@ public class DepartmentService {
 
     public void deleteDepartment(Long id) {
         Department department = findById(id);
-        departmentRepository.delete(department);
+        department.setActive(false);
+        departmentRepository.save(department);
     }
 
     private Department findById(Long id) {

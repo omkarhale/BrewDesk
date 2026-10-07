@@ -1,6 +1,8 @@
 'use client'
 
 import { Users, Coffee, Clock, Layers, AlertCircle, RefreshCw } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import apiClient from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
 import { useRounds } from '@/hooks/useRounds'
 import { getGreeting } from '@/lib/utils'
@@ -10,16 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { RoundStatusBadge } from '@/components/dashboard/RoundStatusBadge'
 import { ErrorState } from '@/components/dashboard/ErrorState'
 import { formatTime } from '@/lib/utils'
-
-/**
- * Admin dashboard uses only confirmed backend endpoints:
- *   GET /api/rounds/today   → Round[]
- *
- * TODO: When the backend implements /api/admin/** routes, add:
- *   GET /api/admin/users/count     → { total, active }
- *   GET /api/admin/beverages/count → { total }
- *   GET /api/admin/orders/count    → { today }
- */
+import { AttendanceTrendsChart } from '@/components/dashboard/AttendanceTrendsChart'
+import { BeverageTrendsChart } from '@/components/dashboard/BeverageTrendsChart'
 
 function RoundCard({ label, count, desc }: { label: string; count: string | number; desc?: string }) {
   return (
@@ -33,7 +27,33 @@ function RoundCard({ label, count, desc }: { label: string; count: string | numb
 
 export default function AdminDashboard() {
   const { user } = useAuth()
-  const { rounds, isLoading, error, refetch } = useRounds(true)
+  const { rounds, isLoading: roundsLoading, error, refetch: refetchRounds } = useRounds(true)
+
+  const { data: userMetrics, isLoading: usersLoading, refetch: refetchMetrics } = useQuery({
+    queryKey: ['admin', 'users', 'metrics'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ totalUsers: number; activeUsers: number }>('/api/admin/users/metrics')
+      return res.data
+    },
+    staleTime: 60000,
+  })
+
+  const { data: beverages, isLoading: beveragesLoading, refetch: refetchBeverages } = useQuery({
+    queryKey: ['beverages', 'count'],
+    queryFn: async () => {
+      const res = await apiClient.get<unknown[]>('/api/beverages')
+      return res.data
+    },
+    staleTime: 60000,
+  })
+
+  const isLoading = roundsLoading || usersLoading || beveragesLoading
+
+  const handleRefreshAll = () => {
+    refetchRounds()
+    refetchMetrics()
+    refetchBeverages()
+  }
 
   const openCount = rounds.filter((r) => r.status === 'OPEN').length
   const closedCount = rounds.filter((r) => r.status === 'CLOSED').length
@@ -49,25 +69,29 @@ export default function AdminDashboard() {
           </h2>
           <p className="mt-1 text-muted-foreground">Admin overview — BrewDesk control centre</p>
         </div>
-        <Button variant="outline" size="sm" onClick={refetch} disabled={isLoading}>
+        <Button variant="outline" size="sm" onClick={handleRefreshAll} disabled={isLoading}>
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
 
-      {/* Stat cards — real data from rounds, placeholders for future admin endpoints */}
+      {/* Stat cards — real data from backend metrics */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Users</p>
-                <p className="mt-1 text-2xl font-bold">—</p>
+                <p className="mt-1 text-2xl font-bold">
+                  {usersLoading ? '…' : userMetrics?.totalUsers ?? '0'}
+                </p>
               </div>
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
                 <Users className="h-4 w-4 text-blue-600" />
               </div>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">Admin endpoint pending</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {userMetrics?.activeUsers ?? 0} active members
+            </p>
           </CardContent>
         </Card>
 
@@ -76,13 +100,15 @@ export default function AdminDashboard() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Beverages</p>
-                <p className="mt-1 text-2xl font-bold">—</p>
+                <p className="mt-1 text-2xl font-bold">
+                  {beveragesLoading ? '…' : beverages?.length ?? '0'}
+                </p>
               </div>
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/20">
                 <Coffee className="h-4 w-4 text-amber-600" />
               </div>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">Admin endpoint pending</p>
+            <p className="mt-2 text-xs text-muted-foreground">In active pantry catalog</p>
           </CardContent>
         </Card>
 
@@ -130,6 +156,12 @@ export default function AdminDashboard() {
         )}
       </div>
 
+      {/* Analytics & Trends Visualizations */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AttendanceTrendsChart />
+        <BeverageTrendsChart />
+      </div>
+
       {/* Today's rounds detail */}
       <Card>
         <CardHeader>
@@ -141,7 +173,7 @@ export default function AdminDashboard() {
               {[1, 2].map((i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
             </div>
           ) : error ? (
-            <ErrorState message={error} onRetry={refetch} />
+            <ErrorState message={error} onRetry={handleRefreshAll} />
           ) : (
             <div className="space-y-3">
               {rounds.map((round) => (

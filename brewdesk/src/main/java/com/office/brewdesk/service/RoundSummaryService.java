@@ -27,9 +27,9 @@ public class RoundSummaryService {
                 .orElseThrow(() ->
                         new RuntimeException("Round not found"));
 
-        // 2. Get all orders
+        // 2. Get all orders with beverage eagerly fetched
         List<BeverageOrder> orders =
-                orderRepository.findByRoundId(roundId);
+                orderRepository.findByRoundIdWithBeverage(roundId);
 
         // 3. Group orders by beverage
         Map<Long, List<BeverageOrder>> groupedOrders =

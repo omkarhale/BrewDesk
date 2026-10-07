@@ -29,11 +29,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@lombok.extern.slf4j.Slf4j
 public class AttendanceEventService {
 
     private final AttendanceEventRepository attendanceEventRepository;
     private final EmployeeProfileRepository employeeProfileRepository;
     private final UserRepository userRepository;
+    private final AttendanceCalculationService attendanceCalculationService;
 
     // -- Dev simulator ---------------------------------------------------------
 
@@ -49,7 +51,18 @@ public class AttendanceEventService {
                 .externalEventId(request.getExternalEventId())
                 .rawPayload("SIMULATED_EVENT")
                 .build();
-        return mapToResponse(attendanceEventRepository.save(event));
+        AttendanceEvent saved = attendanceEventRepository.save(event);
+
+        if (employee.getShift() != null) {
+            try {
+                attendanceCalculationService.calculateAttendance(
+                        employee.getEmployeeCode(), request.getEventTime().toLocalDate());
+            } catch (Exception ex) {
+                log.warn("Automatic attendance calculation after simulated punch failed: {}", ex.getMessage());
+            }
+        }
+
+        return mapToResponse(saved);
     }
 
     // -- Web self-service punch ------------------------------------------------
@@ -76,6 +89,16 @@ public class AttendanceEventService {
                 .rawPayload("WEB_SELF_SERVICE")
                 .build();
         AttendanceEvent savedEvent = attendanceEventRepository.save(event);
+
+        if (employee.getShift() != null) {
+            try {
+                attendanceCalculationService.calculateAttendance(
+                        employee.getEmployeeCode(), now.toLocalDate());
+            } catch (Exception ex) {
+                log.warn("Automatic attendance calculation after web punch failed: {}", ex.getMessage());
+            }
+        }
+
         return WebPunchResponse.builder()
                 .eventId(savedEvent.getId())
                 .employeeCode(employee.getEmployeeCode())

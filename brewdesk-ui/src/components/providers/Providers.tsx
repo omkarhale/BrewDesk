@@ -17,10 +17,8 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        
-      >
-        <AuthProvider>
+      <AuthProvider>
+        <ThemeProvider>
           {children}
           <Toaster
             position="top-right"
@@ -30,8 +28,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
               duration: 4000,
             }}
           />
-        </AuthProvider>
-      </ThemeProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

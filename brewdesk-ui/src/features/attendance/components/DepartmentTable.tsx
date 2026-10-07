@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { Building2, Pencil, Trash2 } from "lucide-react";
 import { Department } from "@/types/attendance";
@@ -83,8 +83,8 @@ export function DepartmentTable({ departments, isLoading, error, onRetry, onAddD
               <tr key={d.id} className="border-t border-border hover:bg-[hsl(220_20%_97%)] dark:hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-50 dark:bg-teal-900/20">
-                      <Building2 className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20">
+                      <Building2 className="h-4 w-4 text-primary" />
                     </div>
                     <p className="text-[13px] font-medium">{d.name}</p>
                   </div>
@@ -93,15 +93,15 @@ export function DepartmentTable({ departments, isLoading, error, onRetry, onAddD
                   <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[11px] font-mono font-semibold text-muted-foreground">{d.code}</span>
                 </td>
                 <td className="px-4 py-3 hidden sm:table-cell">
-                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold", d.active ? "bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", d.active ? "bg-teal-500" : "bg-slate-400")} />
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold", d.active ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")}>
+                    <span className={cn("h-1.5 w-1.5 rounded-full", d.active ? "bg-primary" : "bg-slate-400")} />
                     {d.active ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="px-4 py-3 hidden md:table-cell text-[13px] text-muted-foreground">{formatAttendanceDate(d.createdAt)}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => setEditTarget(d)} className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-teal-50 hover:text-teal-700 transition-colors" title="Edit"><Pencil className="h-3.5 w-3.5" /></button>
+                    <button type="button" onClick={() => setEditTarget(d)} className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors" title="Edit"><Pencil className="h-3.5 w-3.5" /></button>
                     <button type="button" onClick={() => setDeleteTarget(d)} className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </td>

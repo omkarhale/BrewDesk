@@ -68,6 +68,7 @@ public class BeverageService {
                 .orElseThrow(() ->
                         new RuntimeException("Beverage not found"));
 
-        beverageRepository.delete(beverage);
+        beverage.setActive(false);
+        beverageRepository.save(beverage);
     }
 }

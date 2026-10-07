@@ -65,7 +65,9 @@ public class ShiftService {
     }
 
     public void deleteShift(Long id) {
-        shiftRepository.delete(findById(id));
+        Shift shift = findById(id);
+        shift.setActive(false);
+        shiftRepository.save(shift);
     }
 
     private Shift findById(Long id) {

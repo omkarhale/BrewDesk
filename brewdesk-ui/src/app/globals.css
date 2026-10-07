@@ -45,6 +45,13 @@
   --sidebar:            0 0% 100%;       /* pure white sidebar                    */
   --sidebar-border:     220 13% 91%;
 
+  /* ── Charts ─────────────────────────────────────────────────────────────── */
+  --chart-1:            173 100% 30%;    /* brand teal                            */
+  --chart-2:            199 89% 48%;     /* sky blue                              */
+  --chart-3:            45 93% 47%;      /* amber                                 */
+  --chart-4:            142 71% 45%;     /* emerald                               */
+  --chart-5:            280 65% 60%;     /* violet                                */
+
   /* ── Radius ─────────────────────────────────────────────────────────────── */
   --radius: 0.5rem;                      /* 8px — Rippling uses tighter radii     */
 }
@@ -81,6 +88,13 @@
 
   --sidebar:            222 25% 9%;
   --sidebar-border:     217 22% 18%;
+
+  /* ── Charts ─────────────────────────────────────────────────────────────── */
+  --chart-1:            173 80% 42%;
+  --chart-2:            199 89% 60%;
+  --chart-3:            45 93% 58%;
+  --chart-4:            142 70% 50%;
+  --chart-5:            280 65% 65%;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -107,6 +121,12 @@
   --color-input:              hsl(var(--input));
   --color-ring:               hsl(var(--ring));
   --color-sidebar:            hsl(var(--sidebar));
+
+  --color-chart-1:            hsl(var(--chart-1));
+  --color-chart-2:            hsl(var(--chart-2));
+  --color-chart-3:            hsl(var(--chart-3));
+  --color-chart-4:            hsl(var(--chart-4));
+  --color-chart-5:            hsl(var(--chart-5));
 
   /* ── Typography — Inter primary, DM Sans display, JetBrains Mono code ── */
   --font-sans:  var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -308,4 +328,16 @@ h1, h2, h3, h4, h5, h6 {
 .dark .nav-active {
   background: hsl(173 40% 18%);
   color: hsl(173 80% 70%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

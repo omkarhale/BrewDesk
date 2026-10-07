@@ -24,7 +24,7 @@ export function AttendanceSummaryCard({
   value,
   icon: Icon,
   description,
-  colorClass = 'text-teal-600 bg-teal-50 dark:bg-teal-900/20',
+  colorClass = 'text-primary bg-primary/10 dark:bg-primary/20',
   isLoading,
 }: AttendanceSummaryCardProps) {
   if (isLoading) {

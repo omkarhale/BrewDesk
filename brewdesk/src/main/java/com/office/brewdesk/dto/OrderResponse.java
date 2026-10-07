@@ -11,11 +11,21 @@ public class OrderResponse {
 
     private Long orderId;
 
+    private Long employeeId;
+
     private String employeeName;
+
+    private Long beverageId;
 
     private String beverageName;
 
+    private String beverageIcon;
+
+    private Long roundId;
+
     private String roundName;
+
+    private String roundStatus;
 
     private LocalDateTime createdAt;
 }

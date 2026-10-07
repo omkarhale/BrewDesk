@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -21,5 +23,22 @@ public class OrderController {
             @Valid @RequestBody OrderRequest request) {
 
         return orderService.createOrder(request);
+    }
+
+    @GetMapping("/my")
+    public List<OrderResponse> getMyOrders() {
+        return orderService.getMyOrders();
+    }
+
+    @GetMapping
+    public List<OrderResponse> getAllOrders(
+            @RequestParam(required = false) Long roundId) {
+        return orderService.getAllOrders(roundId);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelOrder(@PathVariable Long id) {
+        orderService.cancelOrder(id);
     }
 }

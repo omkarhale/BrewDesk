@@ -80,7 +80,7 @@ export function AttendanceSessionTable({ sessions, isLoading }: AttendanceSessio
 
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-teal-500 shrink-0" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
                       <span className="font-mono">{formatAttendanceTime(session.punchIn)}</span>
                     </div>
                   </td>

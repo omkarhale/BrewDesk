@@ -46,7 +46,7 @@ function SessionRow({ session, index }: { session: AttendanceSession; index: num
 
       {/* In */}
       <div className="flex items-center gap-1 shrink-0">
-        <span className="h-1.5 w-1.5 rounded-full bg-teal-500 shrink-0" />
+        <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
         <span className="font-mono text-[12px] font-medium">{formatAttendanceTime(session.punchIn)}</span>
       </div>
 
@@ -130,8 +130,8 @@ export function PunchClockWidget({
 
   return (
     <div className="card-flat overflow-hidden">
-      {/* Teal top accent strip */}
-      <div className="h-0.5 w-full bg-teal-500" />
+      {/* Top accent strip */}
+      <div className="h-0.5 w-full bg-primary" />
 
       <div className="p-5 space-y-5">
 
@@ -145,11 +145,11 @@ export function PunchClockWidget({
         <div className="flex items-center justify-center gap-2">
           <span className={cn(
             'h-2 w-2 rounded-full shrink-0',
-            isCurrentlyIn ? 'bg-teal-500 animate-pulse' : 'bg-muted-foreground/25',
+            isCurrentlyIn ? 'bg-primary animate-pulse' : 'bg-muted-foreground/25',
           )} />
           <span className={cn(
             'text-[12px] font-medium',
-            isCurrentlyIn ? 'text-teal-700 dark:text-teal-400' : 'text-muted-foreground',
+            isCurrentlyIn ? 'text-primary' : 'text-muted-foreground',
           )}>
             {isCurrentlyIn ? 'Currently checked in' : 'Not checked in'}
           </span>
@@ -167,7 +167,7 @@ export function PunchClockWidget({
               'active:scale-[0.97]',
               isCurrentlyIn
                 ? 'bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-500'
-                : 'bg-teal-600 hover:bg-teal-700',
+                : 'bg-primary hover:bg-primary/90 text-primary-foreground',
             )}
           >
             {isPunching ? (
